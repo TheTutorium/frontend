@@ -10,27 +10,28 @@ export function UserTypeProvider({ children }) {
   const { user } = useAuth();
 
   useEffect(() => {
-    // is signed in?
-    if (!user) {
-      setTypeLoading(false);
-      return;
-    }
+    // // is signed in?
+    // if (!user) {
+    //   setTypeLoading(false);
+    //   return;
+    // }
     setTypeLoading(true);
     const fetchTutorStatus = async () => {
       const token = await getToken();
+
+      console.log("token", token);
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/users/is-tutor`,
+        `${import.meta.env.VITE_API_URL}/users/is-tutor/`,
         {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          // redirect: "follow",
         }
       );
       if (response.ok) {
         const data = await response.json();
-        setIsTutor(data.isTutor);
+        setIsTutor(data);
         setTypeLoading(false);
       } else {
         console.error("Failed to fetch tutor status");

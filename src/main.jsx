@@ -6,11 +6,11 @@ import App from "./App";
 import "./index.css";
 
 createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <MobileMenuProvider>
-      <ThemeProvider>
-        <App />
-      </ThemeProvider>
-    </MobileMenuProvider>
-  </React.StrictMode>
+  // <React.StrictMode>
+  <MobileMenuProvider>
+    <ThemeProvider>
+      <App />
+    </ThemeProvider>
+  </MobileMenuProvider>
+  // </React.StrictMode>
 );

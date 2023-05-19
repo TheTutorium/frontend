@@ -21,6 +21,7 @@ import { Meetings } from "./pages/Meetings";
 import Tutor from "./pages/Tutor";
 import { UserTypeProvider } from "./utils/UserTypeContext";
 import { Canvas } from "./pages/Canvas";
+import { Courses } from "./pages/Courses";
 
 const clerk_pub_key = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -62,6 +63,19 @@ function ClerkProviderWithRoutes() {
                 <>
                   <SignedIn path="/sign-in">
                     <Dashboard />
+                  </SignedIn>
+                  <SignedOut>
+                    <RedirectToSignIn to="/sign-in" />
+                  </SignedOut>
+                </>
+              }
+            />
+            <Route
+              path="/courses"
+              element={
+                <>
+                  <SignedIn path="/sign-in">
+                    <Courses />
                   </SignedIn>
                   <SignedOut>
                     <RedirectToSignIn to="/sign-in" />

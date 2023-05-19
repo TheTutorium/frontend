@@ -9,11 +9,21 @@ import {
   HoverCardTrigger,
 } from "../components/ui/hover-card";
 import { Button } from "../components/ui/button";
-import { CalendarDays } from "lucide-react";
+import {
+  CalendarDays,
+  Link2,
+  Pen,
+  Pencil,
+  School,
+  StarHalf,
+  User2,
+} from "lucide-react";
+import { Link as LinkIcon } from "lucide-react";
 import { Star } from "lucide-react";
 // import madalion from lucide-react
 import { Medal } from "lucide-react";
 import { Link } from "react-router-dom";
+import { FaStar } from "react-icons/fa";
 import {
   Card,
   CardContent,
@@ -48,6 +58,17 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../components/ui/alertDialog";
+import { School2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../components/ui/dialog";
+import { Label } from "../components/ui/label";
 
 const tutor = {
   fullName: "Hasan Huseyin Doeganoglullari",
@@ -65,14 +86,18 @@ function Tutor() {
   return (
     <div
       className="
-      max-w-[1400px]
-      mx-auto
-      self-stretch
-      w-full  
+      flex
+      sm:flex-row
+      flex-col
   "
     >
-      <div className="rounded-lg border bg-card text-card-foreground shadow-sm w-4/5 md:w-full lg:max-w-none mx-auto my-auto flex flex-col lg:justify-start">
-        <div className="flex flex-col lg:flex-row space-y-1.5 lg:space-y-0 p-3 md:p-5 pb-1 md:pb-1 w-full">
+      <div
+        className="sm:w-1/4 min-w-[300px]
+      rounded-lg border bg-card text-card-foreground shadow-sm flex flex-col
+      h-fit ml-2
+      "
+      >
+        <div className="flex flex-col space-y-1.5 p-3 md:p-5 pb-1 md:pb-1 w-full">
           <div className="flex justify-center">
             <Avatar
               style={{
@@ -95,7 +120,7 @@ function Tutor() {
               </AvatarFallback>
             </Avatar>
           </div>
-          <div className="ml-3 lg:w-1/2 xl:w-3/5">
+          <div className="ml-3 ">
             <h3 className="text-lg font-semibold">
               {tutor.fullName.split(" ").slice(0, -1).join(" ") +
                 " " +
@@ -165,87 +190,105 @@ function Tutor() {
           </div>
         </div>
       </div>
-      <div className="">
-        <Tabs defaultValue="account" className="p-3 w-full lg:w-full">
+      <div className="w-full">
+        <Tabs defaultValue="courses" className="p-3 w-full lg:w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="account">Courses</TabsTrigger>
-            <TabsTrigger value="password">Comments</TabsTrigger>
+            <TabsTrigger value="courses">Courses</TabsTrigger>
+            <TabsTrigger value="comments">Comments</TabsTrigger>
           </TabsList>
-          <TabsContent value="account">
+          <TabsContent value="courses">
             <div className="space-y-2">
               <Card>
                 <CardHeader>
                   <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:items-center justify-between p-1">
                     <div className="flex items-center">
-                      <AlarmClock className="w-5 h-5 mr-2 inline-block" />
-                      <CardTitle>Meeting With John Doe</CardTitle>
+                      <Pencil className="w-5 h-5 mr-2 inline-block" />
+                      <CardTitle>CS202 Class help</CardTitle>
                     </div>
                     <div className="flex items-center">
-                      <CalendarClock className="w-4 h-4 mr-2 inline-block text-muted-foreground" />
-                      <CardDescription>
-                        {moment("2023-05-10T12:00:00.000Z").format(
-                          "dddd, MMMM Do YYYY, h:mm a"
-                        )}
-                      </CardDescription>
+                      <LinkIcon className="w-4 h-4 mr-2 inline-block text-muted-foreground" />
+                      <CardDescription>online at Tutoryum.com</CardDescription>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <div className="flex space-x-2">
-                    <p className="text-sm text-muted-foreground">Course:</p>
-                    <p className=" text-sm text-primary">CS202</p>
+                    <p className="text-sm text-muted-foreground">
+                      Description:
+                    </p>
+                    <p className=" text-sm text-primary">
+                      With this course you can finally learn about the CS202
+                    </p>
                   </div>
                   <div className="flex space-x-2">
                     <p className="text-sm text-muted-foreground">Duration:</p>
                     <p className=" text-sm text-primary">60 minutes</p>
                   </div>
-                  <div className="flex space-x-2">
-                    <p className="text-sm text-muted-foreground">Notes:</p>
-                    <p className=" text-sm text-primary">
-                      I want this meeting to be nice
-                    </p>
-                  </div>
                 </CardContent>
                 <CardFooter>
-                  <div className="w-full flex justify-between">
+                  <div className="w-full flex justify-end">
                     <Button className="mr-2">
                       <Edit className="w-4 h-4 mr-2 inline-block" />
                       Edit Course Material
                     </Button>
-                    <Button className="mr-2" variant="destructive">
-                      <XCircle className="w-4 h-4 mr-2 inline-block" />
-                      <AlertDialog>
-                        <AlertDialogTrigger>Cancel meeting</AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>
-                              Are you sure absolutely sure?
-                            </AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This will cancel the meeting and notify the
-                              student. You shouldn't do this unless you have a
-                              good reason.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction>Continue</AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                    <Button className="mr-2">
+                      <Edit className="w-4 h-4 mr-2 inline-block" />
+                      Book Meeting
+                    </Button>
+                  </div>
+                </CardFooter>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:items-center justify-between p-1">
+                    <div className="flex items-center">
+                      <Pencil className="w-5 h-5 mr-2 inline-block" />
+                      <CardTitle>Math260 Class help</CardTitle>
+                    </div>
+                    <div className="flex items-center">
+                      <LinkIcon className="w-4 h-4 mr-2 inline-block text-muted-foreground" />
+                      <CardDescription>online at Tutoryum.com</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="flex space-x-2">
+                    <p className="text-sm text-muted-foreground">
+                      Description:
+                    </p>
+                    <p className=" text-sm text-primary">
+                      With this course you can finally learn about the prob and
+                      stat
+                    </p>
+                  </div>
+                  <div className="flex space-x-2">
+                    <p className="text-sm text-muted-foreground">Duration:</p>
+                    <p className=" text-sm text-primary">60 minutes</p>
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <div className="w-full flex justify-end">
+                    <Button className="mr-2">
+                      <Edit className="w-4 h-4 mr-2 inline-block" />
+                      Edit Course Material
+                    </Button>
+                    <Button className="mr-2">
+                      <Edit className="w-4 h-4 mr-2 inline-block" />
+                      Book Meeting
                     </Button>
                   </div>
                 </CardFooter>
               </Card>
             </div>
           </TabsContent>
-          <TabsContent value="password">
+          <TabsContent value="comments">
             <Card>
               <CardHeader>
                 <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:items-center justify-between p-1">
                   <div className="flex items-center">
-                    <AlarmClock className="w-5 h-5 mr-2 inline-block" />
-                    <CardTitle>Meeting With Hasan Huseyin D.</CardTitle>
+                    <User2 className="w-5 h-5 mr-2 inline-block" />
+                    <CardTitle>Oguzhan O.</CardTitle>
                   </div>
                   <div className="flex items-center">
                     <CalendarClock className="w-4 h-4 mr-2 inline-block text-muted-foreground" />
@@ -259,20 +302,55 @@ function Tutor() {
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex space-x-2">
-                  <p className="text-sm text-muted-foreground">Course:</p>
-                  <p className=" text-sm text-primary">CS202</p>
+                  <p className=" text-md text-secondary-foreground px-5">
+                    Senin silah arkadaslarin sana haklarini helal etmeden
+                    olduler, sen silah arkadaslarinin bedduasini almis adamsin
+                  </p>
                 </div>
               </CardContent>
               <CardFooter>
-                <div className="w-full flex justify-between">
-                  <Button className="mr-2">
-                    <StickyNote className="w-4 h-4 mr-2 inline-block" />
-                    Course Material
-                  </Button>
-                  <Button className="mr-2">
-                    <Edit className="w-4 h-4 mr-2 inline-block" />
-                    Give Feedback
-                  </Button>
+                <div className="w-full flex justify-center">
+                  <div className="text-yellow-500">
+                    <Star className="w-4 h-4 mr-2 inline-block" />
+                    <Star className="w-4 h-4 mr-2 inline-block" />
+                    <StarHalf className="w-4 h-4 mr-2 inline-block" />
+                  </div>
+                </div>
+              </CardFooter>
+            </Card>
+            <Card>
+              <CardHeader>
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:items-center justify-between p-1">
+                  <div className="flex items-center">
+                    <User2 className="w-5 h-5 mr-2 inline-block" />
+                    <CardTitle>Cagri D.</CardTitle>
+                  </div>
+                  <div className="flex items-center">
+                    <CalendarClock className="w-4 h-4 mr-2 inline-block text-muted-foreground" />
+                    <CardDescription>
+                      {moment("2023-05-05T10:00:00.000Z").format(
+                        "dddd, MMMM Do YYYY, h:mm a"
+                      )}
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="flex space-x-2">
+                  <p className=" text-md text-secondary-foreground px-5">
+                    Keske ben bu hoca olsaydim bu yorumu da o atiyor olsaydi
+                  </p>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <div className="w-full flex justify-center">
+                  <div className="text-yellow-500">
+                    <Star className="w-4 h-4 mr-2 inline-block" />
+                    <Star className="w-4 h-4 mr-2 inline-block" />
+                    <Star className="w-4 h-4 mr-2 inline-block" />
+                    <Star className="w-4 h-4 mr-2 inline-block" />
+                    <Star className="w-4 h-4 mr-2 inline-block" />
+                  </div>
                 </div>
               </CardFooter>
             </Card>
