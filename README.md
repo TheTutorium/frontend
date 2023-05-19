@@ -20,5 +20,5 @@ This repository has the codebase of Tutorium's frontend part. It is implemented 
 5. Run the code:
     ```shell
     npm run dev
-6. Now you can access docs of the frontend from the following link:  
+6. Now you can access UI of the frontend from the following link:  
     `localhost:5173`
