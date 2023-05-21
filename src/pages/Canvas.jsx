@@ -9,8 +9,8 @@ export function Canvas() {
   let app = null;
   let text = null;
 
-
-
+  let interactibleObjects = [];
+  let prev_transformations = [];
 
   let sprite_array = [];
 
@@ -27,13 +27,15 @@ export function Canvas() {
 
         let history = loadedText.split("\n");
 
+        console.log(typeof history[0]);
+
         historyRef.current.min = 0;
         historyRef.current.max = history.length - 1; // Update the maximum value
         historyRef.current.value = 0;
 
         for(let i = 0; i < history.length; i++){
           let splittedMessage = history[i].split("|");
-          console.log(history[i]);
+          //console.log(history[i]);
 
           let tempPenType = parseInt(splittedMessage[0]);
           let currentZIndex = parseInt(splittedMessage[1]);
@@ -104,6 +106,7 @@ export function Canvas() {
               tempPText.y = tempY;
 
               sprite_array.push(tempPText);
+              interactibleObjects.push(tempPText);
               tempPText.alpha = 0;
 
               stage.addChild(tempPText);
@@ -119,9 +122,12 @@ export function Canvas() {
               sprite.y = tempY;
 
               sprite_array.push(sprite);
+              interactibleObjects.push(sprite);
               sprite.alpha = 0;
 
               stage.addChild(sprite);
+          }else{
+            sprite_array.push(history[i]);
           }
         }
 
@@ -282,15 +288,67 @@ const handleChangeRange = (event) => {
 
   if(prev_value < cur_value){
     for(let i = prev_value; i < cur_value; i++){
-      console.log(i);
-      sprite_array[i].alpha = 1;
+      if(typeof sprite_array[i] == "string"){
+        let splittedMessage = sprite_array[i].split("|");
+        if(parseInt(splittedMessage[0]) == 4){
+          let temp_obj_index = parseInt(splittedMessage[1]);
+          let obj = interactibleObjects[temp_obj_index];
+          let tempX = parseFloat(splittedMessage[2]);
+          let tempY = parseFloat(splittedMessage[3]);
+          let tempWidth = parseFloat(splittedMessage[4]);
+          let tempHeight = parseFloat(splittedMessage[5]);
+          prev_transformations.push([obj.position.x,obj.position.y, obj.width, obj.height]);
+
+          obj.position.x = tempX;
+          obj.position.y = tempY;
+          obj.width = tempWidth;
+          obj.height = tempHeight;
+        }else if(parseInt(splittedMessage[0]) == -3){
+          for(let j = 0; j < i; j++){
+            if(typeof sprite_array[j] != "string"){
+              sprite_array[j].alpha = 0;
+            }
+          }
+        }
+      }else{
+        sprite_array[i].alpha = 1;
+      }
     }
     prev_value = cur_value;
   }else{
     
     for(let i = prev_value - 1; i >= cur_value; i--){
-      console.log(i);
-      sprite_array[i].alpha = 0;
+      if(typeof sprite_array[i] == "string"){
+        let splittedMessage = sprite_array[i].split("|");
+        if(parseInt(splittedMessage[0]) == 4){
+          let transformation_last = prev_transformations.pop();
+          let temp_obj_index = parseInt(splittedMessage[1]);
+          let obj = interactibleObjects[temp_obj_index];
+          let tempX = transformation_last[0];
+          let tempY = transformation_last[1];
+          let tempWidth = transformation_last[2];
+          let tempHeight = transformation_last[3];
+          //prev_transformations.push([obj.position.x,obj.position.y, obj.width, obj.height]);
+
+          obj.position.x = tempX;
+          obj.position.y = tempY;
+          obj.width = tempWidth;
+          obj.height = tempHeight;
+        }else if(parseInt(splittedMessage[0]) == -3){
+          for(let j = i - 1; j >= 0; j--){
+            if(typeof sprite_array[j] != "string"){
+              sprite_array[j].alpha = 1;
+            }else{
+              let message = sprite_array[j].split('|');
+              if(parseInt(message[0]) == -3){
+                j = -1;
+              }
+            }
+          }
+        }
+      }else{
+        sprite_array[i].alpha = 0;
+      }
     }
     prev_value = cur_value;
   }
