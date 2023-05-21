@@ -17,7 +17,7 @@ export function MobileNav({ children, showMobileMenu, setShowMobileMenu }) {
       <div className="relative z-20 grid gap-6 rounded-md bg-popover p-4 text-popover-foreground shadow-md">
         <Link to="/" className="flex items-center space-x-2">
           <Icons.logo />
-          <span className="font-bold">Tutorium</span>
+          <span className="font-bold">Tutoryum</span>
         </Link>
         <nav className="grid grid-flow-row auto-rows-max text-sm">
           <Link

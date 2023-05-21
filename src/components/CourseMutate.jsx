@@ -23,10 +23,10 @@ export default function CourseMutate({ setCourses, course, edit }) {
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState(course?.name || "");
   const [description, setDescription] = useState(course?.description || "");
-  const [coursePic, setCoursePic] = useState(course?.course_pic || "");
   const [open, setOpen] = useState(false);
   const [duration, setDuration] = useState(course?.duration || 30);
   const { getToken } = useAuth();
+  const [file, setFile] = useState(null);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -34,6 +34,29 @@ export default function CourseMutate({ setCourses, course, edit }) {
     setLoading(true);
 
     const token = await getToken();
+
+    if (file) {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/courses/${course?.id}/picture`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      // close the dialog and reload
+      setOpen(false);
+      // window.location.reload();
+    }
+
     const response = await fetch(`${import.meta.env.VITE_API_URL}/courses/`, {
       method: edit ? "PUT" : "POST",
 
@@ -42,7 +65,6 @@ export default function CourseMutate({ setCourses, course, edit }) {
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        course_pic: coursePic,
         description: description,
         duration: duration,
         name: name,
@@ -89,7 +111,12 @@ export default function CourseMutate({ setCourses, course, edit }) {
         <Tabs defaultValue="courses" className="p-3 w-full lg:w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="courses">Courses</TabsTrigger>
-            <TabsTrigger value="materials">Materials</TabsTrigger>
+            {edit && (
+              <>
+                <TabsTrigger value="picture">Picture</TabsTrigger>
+                <TabsTrigger value="materials">Materials</TabsTrigger>
+              </>
+            )}
           </TabsList>
           <TabsContent value="courses">
             <div className="grid gap-4 py-4">
@@ -131,7 +158,7 @@ export default function CourseMutate({ setCourses, course, edit }) {
                   onChange={(e) => setDuration(e.target.value)}
                 />
               </div>
-              <div className=" items-center gap-4">
+              {/* <div className=" items-center gap-4">
                 <Label htmlFor="Picture" className="text-right">
                   Picture
                 </Label>
@@ -142,12 +169,22 @@ export default function CourseMutate({ setCourses, course, edit }) {
                   onChange={(e) => setCoursePic(e.target.value)}
                   className=""
                 />
-              </div>
+              </div> */}
             </div>
           </TabsContent>
-          <TabsContent value="materials">
-            <h1>sa</h1>{" "}
-          </TabsContent>
+          {edit && (
+            <>
+              <TabsContent value="picture">
+                <input
+                  type="file"
+                  onChange={(e) => setFile(e.target.files[0])}
+                />
+              </TabsContent>
+              <TabsContent value="materials">
+                <h1>sa</h1>{" "}
+              </TabsContent>
+            </>
+          )}
         </Tabs>
         <DialogFooter>
           <div className={"w-full flex justify-between"}>
