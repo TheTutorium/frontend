@@ -11,6 +11,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "../components/ui/tabs";
+import Skeleton from "../components/Skeleton";
 import { useEffect, useState } from "react";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import { Link } from "react-router-dom";
@@ -18,6 +19,16 @@ import BookCourse from "../components/BookCourse";
 import { CourseCard } from "../components/CourseCard";
 import CourseMutate from "../components/CourseMutate";
 import Review from "../components/Review";
+import { Button } from "../components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../components/ui/dialog";
 
 function Tutor() {
   const { id } = useParams();
@@ -31,6 +42,7 @@ function Tutor() {
   const { getToken } = useAuth();
   const [canEdit, setCanEdit] = useState(false);
   const { user } = useUser();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleDeleteCourse = async (courseId) => {
     console.log("delete course", courseId);
@@ -87,7 +99,6 @@ function Tutor() {
 
     const fetchTutor = async () => {
       const token = await getToken();
-      setTutorLoading(true);
       try {
         const response = await fetch(
           `${import.meta.env.VITE_API_URL}/users/${id}/`,
@@ -110,8 +121,6 @@ function Tutor() {
         }
       } catch (error) {
         console.log(error);
-      } finally {
-        setTutorLoading(false);
       }
     };
 
@@ -162,22 +171,8 @@ function Tutor() {
   }, [courses]);
 
   return (
-    <div
-      className="
-    max-w-[1400px]
-    mx-auto
-    self-stretch
-    w-full  
-    h-full
-    justify-center"
-    >
-      <div
-        className="
-      flex
-      sm:flex-row
-      flex-col
-  "
-      >
+    <div className="max-w-[1400px] mx-auto self-stretch w-full h-full  justify-center">
+      <div className=" flex sm:flex-row flex-col ">
         <div className="w-full">
           <Tabs
             defaultValue="courses"
@@ -188,10 +183,7 @@ function Tutor() {
               <TabsTrigger value="comments">Comments</TabsTrigger>
             </TabsList>
             <div className="flex flex-col md:flex-row space-x-2 w-full justify-start">
-              <div
-                className="md:w-1/4 min-w-[300px] rounded-lg bg-card text-card-foreground flex flex-col mt-2
-      "
-              >
+              <div className="md:w-1/4 min-w-[300px] rounded-lg bg-card text-card-foreground flex flex-col mt-2">
                 <div className="flex flex-col space-y-1.5 p-3 md:p-5 pb-1 md:pb-1 w-full">
                   <div className="flex justify-center">
                     <Avatar
@@ -225,7 +217,40 @@ function Tutor() {
                     </div>
                   </div>
                 </div>
-
+                {
+                  // if the user is the tutor, show edit button
+                  canEdit && (
+                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" className="w-12 mx-auto">
+                          {"Edit"}
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent as="form" className="sm:max-w-[425px]">
+                        <DialogHeader>
+                          <DialogTitle>{"Edit"}</DialogTitle>
+                          <DialogDescription>
+                            Enter the required information and click save when
+                            you're done.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                          <div className={"w-full flex justify-between"}>
+                            <Button
+                              type="submit"
+                              onClick={() => {
+                                console.log("submit");
+                                setIsDialogOpen(false);
+                              }}
+                            >
+                              Save changes
+                            </Button>
+                          </div>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  )
+                }
                 <div className="flex space-x-2 justify-center p-3 ">
                   <div className="flex items-center space-x-2">
                     <CalendarDays className="h-4 w-4 text-muted-foreground" />
@@ -251,9 +276,7 @@ function Tutor() {
                 <TabsContent value="courses">
                   <div className="space-y-2">
                     {coursesLoading ? (
-                      <div className="flex justify-center">
-                        <p className="text-muted-foreground">Loading...</p>
-                      </div>
+                      <Skeleton />
                     ) : courses.length === 0 ? (
                       <div className="flex justify-center">
                         <div>
@@ -275,9 +298,11 @@ function Tutor() {
                         ))}
                       </div>
                     )}
-                    <div className={"flex justify-center"}>
-                      <CourseMutate setCourses={setCourses} />
-                    </div>
+                    {canEdit && (
+                      <div className={"flex justify-center"}>
+                        <CourseMutate setCourses={setCourses} />
+                      </div>
+                    )}
                   </div>
                 </TabsContent>
                 <TabsContent value="comments" className="w-full">
@@ -297,32 +322,39 @@ function Tutor() {
                       </div>
                     ) : (
                       <div className="space-y-2">
-                        {Object.keys(reviews).map((courseId) => (
-                          <div key={courseId}>
-                            <div className="flex justify-start">
-                              <h3 className="text-lg font-semibold">
-                                {
-                                  courses.find((c) => c.id === Number(courseId))
-                                    .name
-                                }
-                                {/* {courses[0].id + " " + courseId} */}
-                              </h3>
-                            </div>
-                            <div className="w-full">
-                              <div className="flex flex-col space-y-2">
-                                {reviews[courseId].map((review) => (
-                                  <Review
-                                    key={review.id}
-                                    comment={review.comment}
-                                    rating={review.rating}
-                                    updatedAt={review.updated_at}
-                                    reviewer={review.student_id}
-                                  />
-                                ))}
+                        {Object.keys(reviews).map((courseId) => {
+                          const course = courses.find(
+                            (c) => c.id === Number(courseId)
+                          );
+                          const courseReviews = reviews[courseId];
+
+                          if (!courseReviews || courseReviews.length === 0) {
+                            return null; // Don't render if there are no reviews
+                          }
+
+                          return (
+                            <div key={courseId}>
+                              <div className="flex justify-start">
+                                <h3 className="text-lg font-semibold">
+                                  {course.name}
+                                </h3>
+                              </div>
+                              <div className="w-full">
+                                <div className="flex flex-col space-y-2">
+                                  {courseReviews.map((review) => (
+                                    <Review
+                                      key={review.id}
+                                      comment={review.comment}
+                                      rating={review.rating}
+                                      updatedAt={review.updated_at}
+                                      reviewer={review.student_id}
+                                    />
+                                  ))}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     )}
                   </div>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useMediaQuery } from "../hooks/use-media-query";
 import { Badge } from "./ui/badge";
@@ -35,6 +35,7 @@ import {
 } from "../components/ui/alertDialog";
 import BookCourse from "./BookCourse";
 import CourseMutate from "./CourseMutate";
+import { useAuth } from "@clerk/clerk-react";
 export function CourseCard({
   course,
   canEdit,
@@ -43,6 +44,35 @@ export function CourseCard({
 }) {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const [coursePic, setCoursePic] = useState(null);
+  const { getToken } = useAuth();
+
+  useEffect(() => {
+    const getCoursePic = async () => {
+      const token = await getToken();
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/courses/${course.id}/picture/`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const imageBlob = await response.blob();
+
+      // Create a URL for the image blob
+      const imageURL = URL.createObjectURL(imageBlob);
+
+      // Set the image URL to the course pic state variable
+      setCoursePic(imageURL);
+    };
+
+    getCoursePic();
+  }, []);
 
   return (
     <Card>
@@ -68,7 +98,7 @@ export function CourseCard({
                 borderRadius: "9px",
               }}
             >
-              <AvatarImage src={course.course_pic} alt={course.name} />
+              <AvatarImage src={coursePic} alt={course.name} />
               <AvatarFallback
                 style={{ fontSize: "1.5rem", borderRadius: "9px" }}
               >

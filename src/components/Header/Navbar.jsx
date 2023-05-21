@@ -30,10 +30,10 @@ export default function Navbar({ items, children }) {
       <div className="hidden md:flex">
         <Link to="/" className="items-center space-x-2 flex mr-5">
           <Avatar>
-            <AvatarImage src={"/logo.svg"} alt={"Tutorium"} />
+            <AvatarImage src={"/logo.svg"} alt={"Tutoryum"} />
             <AvatarFallback>C</AvatarFallback>
           </Avatar>
-          <span className="hidden font-bold sm:inline-block">Tutorium</span>
+          <span className="hidden font-bold sm:inline-block">Tutoryum</span>
         </Link>
 
         <NavigationMenu>
@@ -60,10 +60,10 @@ export default function Navbar({ items, children }) {
                     </NavigationMenuLink>
                   </li>
                   <ListItem to="/#about" title="About">
-                    Learn about Tutorium and its mission, vision and values
+                    Learn about Tutoryum and its mission, vision and values
                   </ListItem>
                   <ListItem to="/team" title="Team">
-                    Meet the team behind Tutorium
+                    Meet the team behind Tutoryum
                   </ListItem>
                   <ListItem to="/stack" title="Tech Stack">
                     Get a sense of the tech stack we use
@@ -98,7 +98,7 @@ export default function Navbar({ items, children }) {
             </NavigationMenuItem>
             <NavigationMenuItem>
               <Link to={"/dashboard"}>
-                <Button variant={"ghost"}>Dashboard</Button>
+                <Button variant={"ghost"}>Courses</Button>
               </Link>
             </NavigationMenuItem>
             {user && (
@@ -106,15 +106,6 @@ export default function Navbar({ items, children }) {
                 <NavigationMenuItem>
                   <Link to={"/meetings"}>
                     <Button variant={"ghost"}>Meetings</Button>
-                  </Link>
-                </NavigationMenuItem>
-              </>
-            )}
-            {isTutor && (
-              <>
-                <NavigationMenuItem>
-                  <Link to={"/courses"}>
-                    <Button variant={"ghost"}>Courses</Button>
                   </Link>
                 </NavigationMenuItem>
               </>
@@ -133,7 +124,7 @@ export default function Navbar({ items, children }) {
         onClick={() => setShowMobileMenu(!showMobileMenu)}
       >
         {showMobileMenu ? <Icons.close /> : <Icons.menu />}
-        <span className="font-bold">Tutorium</span>
+        <span className="font-bold">Tutoryum</span>
       </button>
       {showMobileMenu && items && (
         <MobileNav

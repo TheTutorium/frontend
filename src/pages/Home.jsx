@@ -35,7 +35,7 @@ export function Home() {
           By Students For Students
         </h1>
         <p className=" text-center text-muted-foreground text-lg md:text-xl p-3 max-w-[700px] mx-auto">
-          Tutorium is a peer-to-peer learning platform that aims to connect
+          Tutoryum is a peer-to-peer learning platform that aims to connect
           students with each other to help them learn from each other. We
           believe that students can learn better from each other than from their
           professors. We also believe that students can teach better than their
@@ -43,7 +43,7 @@ export function Home() {
           teach each other.
         </p>
         <h1 className="text-3xl text-center font-bold text-primary p-3 mt-5 md:mt-20">
-          About Tutorium
+          About Tutoryum
         </h1>
         <p className=" text-center text-muted-foreground text-lg md:text-xl p-3 max-w-[700px] mx-auto">
           Landing page shit iste klasik doldurcaz burlari ilustrasyon vs koymayi
