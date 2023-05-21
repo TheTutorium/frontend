@@ -15,6 +15,7 @@ import { Button } from "../ui/button";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useClerk } from "@clerk/clerk-react";
+import { useUserType } from "../../utils/UserTypeContext";
 
 /* eslint-disable react/prop-types */
 export default function Navbar({ items, children }) {
@@ -22,6 +23,7 @@ export default function Navbar({ items, children }) {
 
   // if there is a signed user set this const to true
   const { user } = useClerk();
+  const { isTutor } = useUserType();
 
   return (
     <div className="flex gap-6 md:gap-10">
@@ -104,6 +106,15 @@ export default function Navbar({ items, children }) {
                 <NavigationMenuItem>
                   <Link to={"/meetings"}>
                     <Button variant={"ghost"}>Meetings</Button>
+                  </Link>
+                </NavigationMenuItem>
+              </>
+            )}
+            {isTutor && (
+              <>
+                <NavigationMenuItem>
+                  <Link to={"/courses"}>
+                    <Button variant={"ghost"}>Courses</Button>
                   </Link>
                 </NavigationMenuItem>
               </>

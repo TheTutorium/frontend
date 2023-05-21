@@ -1,4 +1,17 @@
 import { Button } from "../components/ui/button";
+
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../components/ui/tabs";
+
+import { useEffect } from "react";
+import { useAuth } from "@clerk/clerk-react";
+
+import { useState } from "react";
+import Booking from "../components/Booking";
 import {
   Card,
   CardContent,
@@ -7,49 +20,18 @@ import {
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "../components/ui/tabs";
-import {
-  AlarmClock,
-  CalendarClock,
-  XCircle,
-  Edit,
-  StickyNote,
-} from "lucide-react";
 import moment from "moment";
-
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "../components/ui/alertDialog";
-
-import { useEffect } from "react";
-import { useAuth } from "@clerk/clerk-react";
-
-import { useState } from "react";
-
 export function Meetings() {
   const { getToken } = useAuth();
   const [data, setData] = useState(null);
-  const [isLoadingTutorStatus, setIsLoadingTutorStatus] = useState(true);
-  const [isLoadingCourse, setIsLoadingCourse] = useState(true);
-  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [reviews, setReviews] = useState({});
+  const [reviewsLoading, setReviewsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchTutorStatus = async () => {
+    const fetchBookings = async () => {
       const dataObj = {};
-      setIsLoadingTutorStatus(true);
+      setIsLoading(true);
 
       const token = await getToken();
       const response = await fetch(
@@ -63,14 +45,13 @@ export function Meetings() {
       );
 
       if (response.ok) {
-        const tutorStatusData = await response.json();
-        console.log(tutorStatusData);
+        const res = await response.json();
 
         const passed = [];
         const incoming = [];
         const now = moment();
 
-        tutorStatusData.forEach((booking) => {
+        res.forEach((booking) => {
           const startTime = moment(booking.start_time);
           if (startTime.isBefore(now)) {
             passed.push(booking);
@@ -79,60 +60,68 @@ export function Meetings() {
           }
         });
 
-        const bookingsPromises = tutorStatusData.map(async (booking) => {
-          const courseId = booking.course_id;
-          setIsLoadingCourse(true);
-          const courseResponse = await fetch(
-            `${import.meta.env.VITE_API_URL}/courses/${courseId}/`,
-            {
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-          if (courseResponse.ok) {
-            const courseData = await courseResponse.json();
-            booking.course = courseData;
-            setIsLoadingCourse(false);
-
-            setIsLoadingUsers(true);
-            const usersResponse = await fetch(
-              `${import.meta.env.VITE_API_URL}/users/${courseData.tutor_id}/`,
-              {
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${token}`,
-                },
-              }
-            );
-            if (usersResponse.ok) {
-              const usersData = await usersResponse.json();
-              booking.tutor = usersData;
-              setIsLoadingUsers(false);
-            } else {
-              console.error("Failed to fetch users");
-              setIsLoadingUsers(false);
-            }
-          } else {
-            console.error("Failed to fetch course");
-            setIsLoadingCourse(false);
-          }
-        });
-
-        await Promise.all(bookingsPromises);
-
         dataObj.passed = passed;
         dataObj.incoming = incoming;
         setData(dataObj);
+
+        setIsLoading(false);
       } else {
         console.error("Failed to fetch tutor status");
-        setIsLoadingTutorStatus(false);
+        setIsLoading(false);
       }
-      setIsLoadingTutorStatus(false);
     };
-    fetchTutorStatus();
+    fetchBookings();
   }, []);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      setReviewsLoading(true);
+      const token = await getToken();
+
+      // create a promises array to hold all fetch promises
+      const promises = data.passed.map((booking) => {
+        return fetch(
+          `${import.meta.env.VITE_API_URL}/reviews/all-by-course/${
+            booking.course_id
+          }/`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      });
+
+      // run all fetch operations simultaneously
+      const responses = await Promise.all(promises);
+
+      // parse JSON for each response and build the reviews object
+      const reviewsObj = {};
+      for (let i = 0; i < responses.length; i++) {
+        if (responses[i].ok) {
+          const review = await responses[i].json();
+          reviewsObj[data.passed[i].course_id] = review;
+        } else {
+          console.error(
+            `Failed to fetch reviews for course ${data.passed[i].course_id}`
+          );
+        }
+      }
+
+      // update state with reviews
+      setReviews(reviewsObj);
+      setReviewsLoading(false);
+    };
+
+    if (data && data.passed.length > 0) {
+      console.log("fetching reviews");
+      fetchReviews();
+      console.log("reviews", reviews);
+    }
+  }, [data]);
+
+  // for every passed
 
   return (
     <div
@@ -152,8 +141,61 @@ export function Meetings() {
         </TabsList>
         <TabsContent value="incoming">
           <div className="space-y-2">
-            {isLoadingTutorStatus || isLoadingCourse || isLoadingUsers ? (
-              <p>Loading...</p>
+            {isLoading ? (
+              <>
+                <Card className="animate-pulse mb-2">
+                  <CardHeader>
+                    <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:items-center justify-between p-1">
+                      <div className="flex items-center">
+                        <div className="w-64 h-6 bg-gray-200 rounded-sm"></div>
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-48 h-4 bg-gray-200 rounded"></div>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <div className=" space-y-2">
+                      <div className="w-64 h-4 bg-gray-200 rounded mb-2"></div>
+                      <div className="w-10/12 h-4 bg-gray-200 rounded"></div>
+                      <div className="w-10/12 h-4 bg-gray-200 rounded"></div>
+                      <div className="w-96 h-4 bg-gray-200 rounded"></div>
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <div className="w-full flex justify-between">
+                      <div className="w-32 h-8 bg-gray-200 rounded mb-2"></div>
+                      <div className="w-32 h-8 bg-gray-200 rounded"></div>
+                    </div>
+                  </CardFooter>
+                </Card>
+                <Card className="animate-pulse">
+                  <CardHeader>
+                    <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:items-center justify-between p-1">
+                      <div className="flex items-center">
+                        <div className="w-64 h-6 bg-gray-200 rounded-sm"></div>
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-48 h-4 bg-gray-200 rounded"></div>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <div className=" space-y-2">
+                      <div className="w-64 h-4 bg-gray-200 rounded mb-2"></div>
+                      <div className="w-10/12 h-4 bg-gray-200 rounded"></div>
+                      <div className="w-10/12 h-4 bg-gray-200 rounded"></div>
+                      <div className="w-96 h-4 bg-gray-200 rounded"></div>
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <div className="w-full flex justify-between">
+                      <div className="w-32 h-8 bg-gray-200 rounded mb-2"></div>
+                      <div className="w-32 h-8 bg-gray-200 rounded"></div>
+                    </div>
+                  </CardFooter>
+                </Card>
+              </>
             ) : data.incoming.length === 0 ? (
               <div className="flex flex-col items-center justify-center">
                 <p className="text-2xl">No meetings yet</p>
@@ -167,80 +209,14 @@ export function Meetings() {
               </div>
             ) : (
               data.incoming.map((booking) => (
-                <Card key={booking.id}>
-                  <CardHeader>
-                    <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:items-center justify-between p-1">
-                      <div className="flex items-center">
-                        <AlarmClock className="w-5 h-5 mr-2 inline-block" />
-                        <CardTitle>
-                          Meeting With {booking.tutor.first_name}{" "}
-                          {booking.tutor.last_name[0]}.
-                        </CardTitle>
-                      </div>
-                      <div className="flex items-center">
-                        <CalendarClock className="w-4 h-4 mr-2 inline-block text-muted-foreground" />
-                        <CardDescription>
-                          {moment(booking.start_time).format(
-                            "dddd, MMMM Do YYYY, h:mm a"
-                          )}
-                        </CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <div className="flex space-x-2">
-                      <p className="text-sm text-muted-foreground">Course:</p>
-                      <p className="text-sm text-primary">
-                        {booking.course.name}
-                      </p>
-                    </div>
-                    <div className="flex space-x-2">
-                      <p className="text-sm text-muted-foreground">Duration:</p>
-                      <p className="text-sm text-primary">
-                        {booking.course.duration} minutes
-                      </p>
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <div className="w-full flex justify-between">
-                      <Button className="mr-2">
-                        <Edit className="w-4 h-4 mr-2 inline-block" />
-                        Edit Course Material
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger>
-                          {/* <Button className="mr-2" variant="destructive"> */}
-                          <XCircle className="w-4 h-4 mr-2 inline-block " />
-                          Cancel
-                          {/* </Button> */}
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>
-                              Are you absolutely sure?
-                            </AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This will cancel the meeting and notify the
-                              student. You shouldn't do this unless you have a
-                              good reason.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction>Continue</AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </CardFooter>
-                </Card>
+                <Booking booking={booking} key={booking.id} />
               ))
             )}
           </div>
         </TabsContent>
         <TabsContent value="passed">
           <div className="space-y-2">
-            {isLoadingTutorStatus || isLoadingCourse || isLoadingUsers ? (
+            {isLoading ? (
               <p>Loading...</p>
             ) : data.passed.length === 0 ? (
               <div className="flex flex-col items-center justify-center">
@@ -251,55 +227,12 @@ export function Meetings() {
                 </p>
               </div>
             ) : (
-              data.passed.map((booking) => (
-                <Card key={booking.id}>
-                  <CardHeader>
-                    <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:items-center justify-between p-1">
-                      <div className="flex items-center">
-                        <AlarmClock className="w-5 h-5 mr-2 inline-block" />
-                        <CardTitle>
-                          Meeting With {booking.tutor.first_name}{" "}
-                          {booking.tutor.last_name[0]}.
-                        </CardTitle>
-                      </div>
-                      <div className="flex items-center">
-                        <CalendarClock className="w-4 h-4 mr-2 inline-block text-muted-foreground" />
-                        <CardDescription>
-                          {moment(booking.start_time).format(
-                            "dddd, MMMM Do YYYY, h:mm a"
-                          )}
-                        </CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <div className="flex space-x-2">
-                      <p className="text-sm text-muted-foreground">Course:</p>
-                      <p className="text-sm text-primary">
-                        {booking.course.name}
-                      </p>
-                    </div>
-                    <div className="flex space-x-2">
-                      <p className="text-sm text-muted-foreground">Duration:</p>
-                      <p className="text-sm text-primary">
-                        {booking.course.duration} minutes
-                      </p>
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <div className="w-full flex justify-between">
-                      <Button className="mr-2" variant="secondary">
-                        <StickyNote className="w-4 h-4 mr-2 inline-block" />
-                        See Course Material
-                      </Button>
-                      <Button className="mr-2" variant="secondary">
-                        <Edit className="w-4 h-4 mr-2 inline-block" />
-                        Comment
-                      </Button>
-                    </div>
-                  </CardFooter>
-                </Card>
-              ))
+              <>
+                {data.passed.map((booking) => (
+                  <Booking booking={booking} key={booking.id} isPassed={true} />
+                ))}
+                {reviewsLoading ? <p>Loading...</p> : <h1>Reviews</h1>}
+              </>
             )}
           </div>
         </TabsContent>

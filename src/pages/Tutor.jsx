@@ -1,361 +1,336 @@
 import { useParams } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { useMediaQuery } from "../hooks/use-media-query";
-import { Badge } from "../components/ui/badge";
-// import { Popover } from "./ui/popover";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "../components/ui/hover-card";
-import { Button } from "../components/ui/button";
-import {
-  CalendarDays,
-  Link2,
-  Pen,
-  Pencil,
-  School,
-  StarHalf,
-  User2,
-} from "lucide-react";
-import { Link as LinkIcon } from "lucide-react";
+import { CalendarDays, CalendarClock, StarHalf, User2 } from "lucide-react";
 import { Star } from "lucide-react";
 // import madalion from lucide-react
 import { Medal } from "lucide-react";
-import { Link } from "react-router-dom";
-import { FaStar } from "react-icons/fa";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "../components/ui/tabs";
-import {
-  AlarmClock,
-  CalendarClock,
-  XCircle,
-  Edit,
-  StickyNote,
-} from "lucide-react";
-import moment from "moment";
+import { useEffect, useState } from "react";
+import { useAuth, useUser } from "@clerk/clerk-react";
+import { Link } from "react-router-dom";
+import BookCourse from "../components/BookCourse";
+import { CourseCard } from "../components/CourseCard";
+import CourseMutate from "../components/CourseMutate";
+import Review from "../components/Review";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "../components/ui/alertDialog";
-import { School2 } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../components/ui/dialog";
-import { Label } from "../components/ui/label";
-
-const tutor = {
-  fullName: "Hasan Huseyin Doeganoglullari",
-  profileImageUrl: "https://i.pravatar.cc/300",
-  description:
-    "I Never Ask My Clients to judge me on my winners, I ask them to judge me on my losers because i have so few",
-  hours: 10,
-  rating: 4.5,
-  badges: 5,
-  id: 1,
-};
 function Tutor() {
   const { id } = useParams();
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const [courses, setCourses] = useState([]);
+  const [coursesLoading, setCoursesLoading] = useState(false);
+  const [tutor, setTutor] = useState({});
+  const [tutorLoading, setTutorLoading] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const { getToken } = useAuth();
+  const [canEdit, setCanEdit] = useState(false);
+  const { user } = useUser();
+
+  const handleDeleteCourse = async (courseId) => {
+    console.log("delete course", courseId);
+    const token = await getToken();
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/courses/deactivate/${courseId}/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data = await response.json();
+      if (response.ok) {
+        setCourses((courses) => courses.filter((c) => c.id !== courseId));
+      } else {
+        throw new Error(data.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      setCoursesLoading(true);
+      const token = await getToken();
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/courses/all-by-tutor/${id}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const data = await response.json();
+        if (response.ok) {
+          setCourses(data);
+          // console.log(data);
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setCoursesLoading(false);
+      }
+    };
+
+    const fetchTutor = async () => {
+      const token = await getToken();
+      setTutorLoading(true);
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/users/${id}/`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const data = await response.json();
+        if (response.ok) {
+          setTutor(data);
+          // console.log(data);
+          if (user.id === data.id) {
+            setCanEdit(true);
+          }
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setTutorLoading(false);
+      }
+    };
+
+    fetchTutor();
+    fetchCourses();
+  }, [id]);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      setReviewsLoading(true);
+
+      const token = await getToken();
+      // create a promises array to hold all fetch promises
+      const promises = courses.map((course) => {
+        return fetch(
+          `${import.meta.env.VITE_API_URL}/reviews/all-by-course/${course.id}/`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      });
+      // run all fetch operations simultaneously
+      const responses = await Promise.all(promises);
+      // parse JSON for each response and build the reviews object
+      const reviewsObj = {};
+      for (let i = 0; i < responses.length; i++) {
+        if (responses[i].ok) {
+          const review = await responses[i].json();
+          reviewsObj[courses[i].id] = review;
+        } else {
+          console.error(`Failed to fetch reviews for course ${courses[i].id}`);
+        }
+      }
+      // // update state with reviews
+      setReviews(reviewsObj);
+      console.log(reviewsObj);
+      setReviewsLoading(false);
+    };
+
+    if (courses && courses.length > 0) {
+      console.log("courses", courses);
+      console.log("fetching reviews");
+      fetchReviews();
+    }
+  }, [courses]);
+
   return (
     <div
       className="
+    max-w-[1400px]
+    mx-auto
+    self-stretch
+    w-full  
+    h-full
+    justify-center"
+    >
+      <div
+        className="
       flex
       sm:flex-row
       flex-col
   "
-    >
-      <div
-        className="sm:w-1/4 min-w-[300px]
-      rounded-lg border bg-card text-card-foreground shadow-sm flex flex-col
-      h-fit ml-2
-      "
       >
-        <div className="flex flex-col space-y-1.5 p-3 md:p-5 pb-1 md:pb-1 w-full">
-          <div className="flex justify-center">
-            <Avatar
-              style={{
-                width: isMobile ? "120px" : "160px",
-                height: isMobile ? "120px" : "160px",
-                borderRadius: "9px",
-              }}
-            >
-              <AvatarImage src={tutor.profileImageUrl} alt={tutor.fullName} />
-              <AvatarFallback
-                style={{ fontSize: "1.5rem", borderRadius: "9px" }}
+        <div className="w-full">
+          <Tabs
+            defaultValue="courses"
+            className="p-3 w-full flex flex-col justify-center"
+          >
+            <TabsList>
+              <TabsTrigger value="courses">Courses</TabsTrigger>
+              <TabsTrigger value="comments">Comments</TabsTrigger>
+            </TabsList>
+            <div className="flex flex-col md:flex-row space-x-2 w-full justify-start">
+              <div
+                className="md:w-1/4 min-w-[300px] rounded-lg bg-card text-card-foreground flex flex-col mt-2
+      "
               >
-                {/* {user.fullName[0].toUpperCase()} */}
-                {/* take the first letter from first two names */}
-                {tutor.fullName
-                  .split(" ")
-                  .map((name) => name[0])
-                  .join("")
-                  .toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          </div>
-          <div className="ml-3 ">
-            <h3 className="text-lg font-semibold">
-              {tutor.fullName.split(" ").slice(0, -1).join(" ") +
-                " " +
-                tutor.fullName.split(" ").slice(-1)[0][0] +
-                "."}
-            </h3>
-            <div className="">
-              <div className="flex space-x-2">
-                {/* 5 times map */}
-                {[...Array(2)].map((_, i) => (
-                  <HoverCard key={i}>
-                    <HoverCardTrigger asChild>
-                      <div className={"cursor-pointer"}>
-                        <Badge>CS202/A-</Badge>
+                <div className="flex flex-col space-y-1.5 p-3 md:p-5 pb-1 md:pb-1 w-full">
+                  <div className="flex justify-center">
+                    <Avatar
+                      style={{
+                        width: isMobile ? "120px" : "160px",
+                        height: isMobile ? "120px" : "160px",
+                        borderRadius: "9px",
+                      }}
+                    >
+                      <AvatarImage
+                        src={tutor.profile_pic}
+                        alt={tutor.first_name}
+                      />
+                      <AvatarFallback
+                        style={{ fontSize: "1.5rem", borderRadius: "9px" }}
+                      >
+                        {tutor.first_name}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+                  <div className="ml-3 ">
+                    <h3 className="text-lg font-semibold">
+                      {tutor.first_name}
+                    </h3>
+
+                    {/* description */}
+                    <div className="mt-2">
+                      <p className="text-sm text-muted-foreground italic">
+                        {tutor.description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex space-x-2 justify-center p-3 ">
+                  <div className="flex items-center space-x-2">
+                    <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      {tutor.hours} hours
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Medal className="h-4 w-4 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      {tutor.badges} badges
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Star className="h-4 w-4 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      {tutor.rating} rating
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="w-full">
+                <TabsContent value="courses">
+                  <div className="space-y-2">
+                    {coursesLoading ? (
+                      <div className="flex justify-center">
+                        <p className="text-muted-foreground">Loading...</p>
                       </div>
-                    </HoverCardTrigger>
-                    <HoverCardContent className="w-80">
-                      <div className="flex justify-between space-x-4">
-                        <Avatar>
-                          <AvatarImage src="https://upload.wikimedia.org/wikipedia/en/thumb/5/5e/Bilkent_University_Crest.svg/316px-Bilkent_University_Crest.svg.png?20210813000718" />
-                          <AvatarFallback>BU</AvatarFallback>
-                        </Avatar>
-                        <div className="space-y-1">
-                          <h4 className="text-sm font-semibold">CS-202/A+</h4>
-                          <p className="text-sm">
-                            This user completed the CS-202 course at Bilkent
-                            with an A+ grade.
-                          </p>
-                          <div className="flex items-center pt-2">
-                            <CalendarDays className="mr-2 h-4 w-4 opacity-70" />{" "}
-                            <span className="text-xs text-muted-foreground">
-                              December 2021
-                            </span>
+                    ) : courses.length === 0 ? (
+                      <div className="flex justify-center">
+                        <div>
+                          <div className="flex justify-center">
+                            No courses found
                           </div>
                         </div>
                       </div>
-                    </HoverCardContent>
-                  </HoverCard>
-                ))}
+                    ) : (
+                      <div className="space-y-2">
+                        {courses.map((course) => (
+                          <CourseCard
+                            key={course.id}
+                            course={course}
+                            canEdit={canEdit}
+                            handleDeleteCourse={handleDeleteCourse}
+                            setCourses={setCourses}
+                          />
+                        ))}
+                      </div>
+                    )}
+                    <div className={"flex justify-center"}>
+                      <CourseMutate setCourses={setCourses} />
+                    </div>
+                  </div>
+                </TabsContent>
+                <TabsContent value="comments" className="w-full">
+                  {/* for every course display the name and reviews */}
+                  <div className="space-y-2 w-full">
+                    {reviewsLoading ? (
+                      <div className="flex justify-center">
+                        <p className="text-muted-foreground">Loading...</p>
+                      </div>
+                    ) : Object.keys(reviews).length === 0 ? (
+                      <div className="flex w-full">
+                        <div>
+                          <div className="flex justify-center">
+                            No reviews found
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {Object.keys(reviews).map((courseId) => (
+                          <div key={courseId}>
+                            <div className="flex justify-start">
+                              <h3 className="text-lg font-semibold">
+                                {
+                                  courses.find((c) => c.id === Number(courseId))
+                                    .name
+                                }
+                                {/* {courses[0].id + " " + courseId} */}
+                              </h3>
+                            </div>
+                            <div className="w-full">
+                              <div className="flex flex-col space-y-2">
+                                {reviews[courseId].map((review) => (
+                                  <Review
+                                    key={review.id}
+                                    comment={review.comment}
+                                    rating={review.rating}
+                                    updatedAt={review.updated_at}
+                                    reviewer={review.student_id}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
               </div>
             </div>
-            {/* description */}
-            <div className="mt-2">
-              <p className="text-sm text-muted-foreground italic">
-                {tutor.description}
-              </p>
-            </div>
-          </div>
+          </Tabs>
         </div>
-
-        <div className="flex space-x-2 justify-center p-3 ">
-          <div className="flex items-center space-x-2">
-            <CalendarDays className="h-4 w-4 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">{tutor.hours} hours</p>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Medal className="h-4 w-4 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">
-              {tutor.badges} badges
-            </p>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Star className="h-4 w-4 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">
-              {tutor.rating} rating
-            </p>
-          </div>
-        </div>
-      </div>
-      <div className="w-full">
-        <Tabs defaultValue="courses" className="p-3 w-full lg:w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="courses">Courses</TabsTrigger>
-            <TabsTrigger value="comments">Comments</TabsTrigger>
-          </TabsList>
-          <TabsContent value="courses">
-            <div className="space-y-2">
-              <Card>
-                <CardHeader>
-                  <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:items-center justify-between p-1">
-                    <div className="flex items-center">
-                      <Pencil className="w-5 h-5 mr-2 inline-block" />
-                      <CardTitle>CS202 Class help</CardTitle>
-                    </div>
-                    <div className="flex items-center">
-                      <LinkIcon className="w-4 h-4 mr-2 inline-block text-muted-foreground" />
-                      <CardDescription>online at Tutoryum.com</CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="flex space-x-2">
-                    <p className="text-sm text-muted-foreground">
-                      Description:
-                    </p>
-                    <p className=" text-sm text-primary">
-                      With this course you can finally learn about the CS202
-                    </p>
-                  </div>
-                  <div className="flex space-x-2">
-                    <p className="text-sm text-muted-foreground">Duration:</p>
-                    <p className=" text-sm text-primary">60 minutes</p>
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <div className="w-full flex justify-end">
-                    <Button className="mr-2">
-                      <Edit className="w-4 h-4 mr-2 inline-block" />
-                      Edit Course Material
-                    </Button>
-                    <Button className="mr-2">
-                      <Edit className="w-4 h-4 mr-2 inline-block" />
-                      Book Meeting
-                    </Button>
-                  </div>
-                </CardFooter>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:items-center justify-between p-1">
-                    <div className="flex items-center">
-                      <Pencil className="w-5 h-5 mr-2 inline-block" />
-                      <CardTitle>Math260 Class help</CardTitle>
-                    </div>
-                    <div className="flex items-center">
-                      <LinkIcon className="w-4 h-4 mr-2 inline-block text-muted-foreground" />
-                      <CardDescription>online at Tutoryum.com</CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="flex space-x-2">
-                    <p className="text-sm text-muted-foreground">
-                      Description:
-                    </p>
-                    <p className=" text-sm text-primary">
-                      With this course you can finally learn about the prob and
-                      stat
-                    </p>
-                  </div>
-                  <div className="flex space-x-2">
-                    <p className="text-sm text-muted-foreground">Duration:</p>
-                    <p className=" text-sm text-primary">60 minutes</p>
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <div className="w-full flex justify-end">
-                    <Button className="mr-2">
-                      <Edit className="w-4 h-4 mr-2 inline-block" />
-                      Edit Course Material
-                    </Button>
-                    <Button className="mr-2">
-                      <Edit className="w-4 h-4 mr-2 inline-block" />
-                      Book Meeting
-                    </Button>
-                  </div>
-                </CardFooter>
-              </Card>
-            </div>
-          </TabsContent>
-          <TabsContent value="comments">
-            <Card>
-              <CardHeader>
-                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:items-center justify-between p-1">
-                  <div className="flex items-center">
-                    <User2 className="w-5 h-5 mr-2 inline-block" />
-                    <CardTitle>Oguzhan O.</CardTitle>
-                  </div>
-                  <div className="flex items-center">
-                    <CalendarClock className="w-4 h-4 mr-2 inline-block text-muted-foreground" />
-                    <CardDescription>
-                      {moment("2023-05-05T10:00:00.000Z").format(
-                        "dddd, MMMM Do YYYY, h:mm a"
-                      )}
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="flex space-x-2">
-                  <p className=" text-md text-secondary-foreground px-5">
-                    Senin silah arkadaslarin sana haklarini helal etmeden
-                    olduler, sen silah arkadaslarinin bedduasini almis adamsin
-                  </p>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <div className="w-full flex justify-center">
-                  <div className="text-yellow-500">
-                    <Star className="w-4 h-4 mr-2 inline-block" />
-                    <Star className="w-4 h-4 mr-2 inline-block" />
-                    <StarHalf className="w-4 h-4 mr-2 inline-block" />
-                  </div>
-                </div>
-              </CardFooter>
-            </Card>
-            <Card>
-              <CardHeader>
-                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:items-center justify-between p-1">
-                  <div className="flex items-center">
-                    <User2 className="w-5 h-5 mr-2 inline-block" />
-                    <CardTitle>Cagri D.</CardTitle>
-                  </div>
-                  <div className="flex items-center">
-                    <CalendarClock className="w-4 h-4 mr-2 inline-block text-muted-foreground" />
-                    <CardDescription>
-                      {moment("2023-05-05T10:00:00.000Z").format(
-                        "dddd, MMMM Do YYYY, h:mm a"
-                      )}
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="flex space-x-2">
-                  <p className=" text-md text-secondary-foreground px-5">
-                    Keske ben bu hoca olsaydim bu yorumu da o atiyor olsaydi
-                  </p>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <div className="w-full flex justify-center">
-                  <div className="text-yellow-500">
-                    <Star className="w-4 h-4 mr-2 inline-block" />
-                    <Star className="w-4 h-4 mr-2 inline-block" />
-                    <Star className="w-4 h-4 mr-2 inline-block" />
-                    <Star className="w-4 h-4 mr-2 inline-block" />
-                    <Star className="w-4 h-4 mr-2 inline-block" />
-                  </div>
-                </div>
-              </CardFooter>
-            </Card>
-          </TabsContent>
-        </Tabs>
       </div>
     </div>
   );

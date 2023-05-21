@@ -23,6 +23,7 @@ import {
   CreditCard,
   Github,
   Keyboard,
+  LayoutDashboard,
   LifeBuoy,
   LogOut,
   Mail,
@@ -38,14 +39,14 @@ import {
   Users,
 } from "lucide-react";
 
-// import { Icons } from ;
-/* eslint-disable react/prop-types */
 import { useClerk, useUser } from "@clerk/clerk-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../utils/ThemeContext";
+import { useUserType } from "../../utils/UserTypeContext";
 
 export function Header() {
   const { user } = useUser();
+  const { isTutor } = useUserType();
   const navigate = useNavigate();
   const { signOut } = useClerk();
   const { darkMode, setDarkMode } = useTheme();
@@ -78,6 +79,20 @@ export function Header() {
               <DropdownMenuContent className="w-56">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
+
+                {isTutor && (
+                  <DropdownMenuGroup>
+                    {" "}
+                    <DropdownMenuItem
+                      onSelect={() => navigate("/tutors/" + user.id)}
+                    >
+                      <LayoutDashboard className="mr-2 h-4 w-4" />
+                      <span>Tutor Page</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                )}
+
+                <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                   <DropdownMenuItem onSelect={() => navigate("/profile")}>
                     <User className="mr-2 h-4 w-4" />
@@ -101,7 +116,7 @@ export function Header() {
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
-                  <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+                  <DropdownMenuShortcut>⇧⌘L</DropdownMenuShortcut>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

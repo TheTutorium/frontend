@@ -19,7 +19,7 @@ export function UserTypeProvider({ children }) {
     const fetchTutorStatus = async () => {
       const token = await getToken();
 
-      console.log("token", token);
+      console.log(token);
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/users/is-tutor/`,
         {
