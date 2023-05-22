@@ -319,15 +319,17 @@ function Tutor() {
                       </div>
                     ) : (
                       <div className="space-y-2">
-                        {courses.map((course) => (
-                          <CourseCard
-                            key={course.id}
-                            course={course}
-                            canEdit={canEdit}
-                            handleDeleteCourse={handleDeleteCourse}
-                            setCourses={setCourses}
-                          />
-                        ))}
+                        {courses
+                          .filter((course) => !course.deactivated)
+                          .map((course) => (
+                            <CourseCard
+                              key={course.id}
+                              course={course}
+                              canEdit={canEdit}
+                              handleDeleteCourse={handleDeleteCourse}
+                              setCourses={setCourses}
+                            />
+                          ))}
                       </div>
                     )}
                     {canEdit && (

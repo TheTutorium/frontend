@@ -8,6 +8,7 @@ import Skeleton from "../components/Skeleton";
 
 export function Dashboard() {
   const { getToken } = useAuth();
+  const { user } = useUser();
   const { isTutor, typeLoading } = useUserType();
   const [courses, setCourses] = useState([]);
   const [coursesLoading, setCoursesLoading] = useState(true);
@@ -27,8 +28,10 @@ export function Dashboard() {
       );
       if (response.ok) {
         const data = await response.json();
-        console.log("data", data);
-        setCourses(data);
+        // console.log("data", data);
+        // filter the courses to only show the ones that are active
+        const activeCourses = data.filter((course) => !course.deactivated);
+        setCourses(activeCourses);
         setCoursesLoading(false);
 
         // setCourses(coursesWithTutorNames);
@@ -38,6 +41,31 @@ export function Dashboard() {
     };
     fetchCourses();
   }, []);
+
+  const handleDeleteCourse = async (courseId) => {
+    console.log("delete course", courseId);
+    const token = await getToken();
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/courses/deactivate/${courseId}/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data = await response.json();
+      if (response.ok) {
+        setCourses((courses) => courses.filter((c) => c.id !== courseId));
+      } else {
+        throw new Error(data.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <div className="max-w-[1400px] mx-auto self-stretch w-full">
@@ -54,7 +82,13 @@ export function Dashboard() {
                 </div>
               ) : (
                 courses.map((course) => (
-                  <CourseCard key={course.id} course={course} />
+                  <CourseCard
+                    key={course.id}
+                    canEdit={user.id === course.tutor_id}
+                    course={course}
+                    setCourses={setCourses}
+                    handleDeleteCourse={handleDeleteCourse}
+                  />
                 ))
               )}
             </div>
