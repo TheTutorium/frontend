@@ -1,8 +1,172 @@
-import * as PIXI from 'pixi.js';
-import React, { useRef} from 'react';
+import * as PIXI from "pixi.js";
+import { useParams } from "react-router-dom";
+import React, { useEffect, useRef, useState } from "react";
+import { useAuth } from "@clerk/clerk-react";
+import { Button } from "../components/ui/button";
 
 export function Canvas() {
-  //const [value, setValue] = useState(0);
+  const { id } = useParams();
+  const { getToken } = useAuth();
+
+  useEffect(() => {
+    const fetchWhiteboard = async (id) => {
+      const token = await getToken();
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/whiteboards/by-booking/${id}/`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const data = await response.json();
+        if (response.ok) {
+          console.log(data);
+          const stage = app.stage;
+          if (app) {
+            let history = data.content.split("\n");
+
+            console.log(typeof history[0]);
+
+            historyRef.current.min = 0;
+            historyRef.current.max = history.length - 1; // Update the maximum value
+            historyRef.current.value = 0;
+
+            for (let i = 0; i < history.length; i++) {
+              let splittedMessage = history[i].split("|");
+              //console.log(history[i]);
+
+              let tempPenType = parseInt(splittedMessage[0]);
+              let currentZIndex = parseInt(splittedMessage[1]);
+
+              if (tempPenType == 0) {
+                // Pen
+                let initX = parseFloat(splittedMessage[2]);
+                let initY = parseFloat(splittedMessage[3]);
+                let control1x = parseFloat(splittedMessage[4]);
+                let control1y = parseFloat(splittedMessage[5]);
+                let control2x = parseFloat(splittedMessage[6]);
+                let control2y = parseFloat(splittedMessage[7]);
+                let finalX = parseFloat(splittedMessage[8]);
+                let finalY = parseFloat(splittedMessage[9]);
+                let tempPenSize = parseInt(splittedMessage[10]);
+                let tempPenColor = parseInt(splittedMessage[11]);
+
+                let tempSprite = new PIXI.Graphics();
+
+                tempSprite.lineStyle(tempPenSize, tempPenColor, 1);
+
+                tempSprite.zIndex = currentZIndex;
+                tempSprite.moveTo(initX, initY);
+                tempSprite.bezierCurveTo(
+                  control1x,
+                  control1y,
+                  control2x,
+                  control2y,
+                  finalX,
+                  finalY
+                );
+
+                sprite_array.push(tempSprite);
+                tempSprite.alpha = 0;
+
+                stage.addChild(tempSprite);
+              } else if (tempPenType == 1) {
+                // Eraser
+                let initX = parseFloat(splittedMessage[2]);
+                let initY = parseFloat(splittedMessage[3]);
+                let control1x = parseFloat(splittedMessage[4]);
+                let control1y = parseFloat(splittedMessage[5]);
+                let control2x = parseFloat(splittedMessage[6]);
+                let control2y = parseFloat(splittedMessage[7]);
+                let finalX = parseFloat(splittedMessage[8]);
+                let finalY = parseFloat(splittedMessage[9]);
+                let tempEraserSize = parseInt(splittedMessage[10]);
+
+                let tempSprite = new PIXI.Graphics();
+
+                tempSprite.lineStyle(tempEraserSize, 0xffffff, 1);
+
+                tempSprite.zIndex = currentZIndex;
+                tempSprite.moveTo(initX, initY);
+                tempSprite.bezierCurveTo(
+                  control1x,
+                  control1y,
+                  control2x,
+                  control2y,
+                  finalX,
+                  finalY
+                );
+
+                sprite_array.push(tempSprite);
+                tempSprite.alpha = 0;
+
+                stage.addChild(tempSprite);
+              } else if (tempPenType == 2) {
+                // Typing
+                let tempTextSize = parseInt(splittedMessage[2]);
+                let tempTextColor = parseInt(splittedMessage[3]);
+                let tempText = splittedMessage[4];
+                let tempX = parseFloat(splittedMessage[5]);
+                let tempY = parseFloat(splittedMessage[6]);
+
+                let tempStyle = new PIXI.TextStyle({
+                  fontFamily: "Arial",
+                  fontSize: tempTextSize,
+                  fill: tempTextColor,
+                });
+
+                let tempPText = new PIXI.Text(tempText, tempStyle);
+                tempPText.zIndex = currentZIndex;
+                tempPText.x = tempX;
+                tempPText.y = tempY;
+
+                sprite_array.push(tempPText);
+                interactibleObjects.push(tempPText);
+                tempPText.alpha = 0;
+
+                stage.addChild(tempPText);
+              } else if (tempPenType == 3) {
+                let temp_image = splittedMessage[2];
+                let tempX = parseFloat(splittedMessage[3]);
+                let tempY = parseFloat(splittedMessage[4]);
+
+                const image_texture = PIXI.Texture.from(temp_image);
+                const sprite = new PIXI.Sprite(image_texture);
+
+                sprite.x = tempX;
+                sprite.y = tempY;
+
+                sprite_array.push(sprite);
+                interactibleObjects.push(sprite);
+                sprite.alpha = 0;
+
+                stage.addChild(sprite);
+              } else {
+                sprite_array.push(history[i]);
+              }
+            }
+            navigate_history(sprite_array.length - 1);
+            document
+              .getElementsByClassName("ozgur")[0]
+              .classList.toggle("hidden");
+            document
+              .getElementsByClassName("keko")[0]
+              .classList.toggle("hidden");
+          }
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    console.log(id);
+    fetchWhiteboard(id);
+  }, []);
 
   const historyRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -14,7 +178,6 @@ export function Canvas() {
 
   let sprite_array = [];
 
-
   const handleFileInputChange = (event) => {
     const file = event.target.files[0];
     const reader = new FileReader();
@@ -24,7 +187,6 @@ export function Canvas() {
       const loadedText = e.target.result;
 
       if (app) {
-
         let history = loadedText.split("\n");
 
         console.log(typeof history[0]);
@@ -33,104 +195,120 @@ export function Canvas() {
         historyRef.current.max = history.length - 1; // Update the maximum value
         historyRef.current.value = 0;
 
-        for(let i = 0; i < history.length; i++){
+        for (let i = 0; i < history.length; i++) {
           let splittedMessage = history[i].split("|");
           //console.log(history[i]);
 
           let tempPenType = parseInt(splittedMessage[0]);
           let currentZIndex = parseInt(splittedMessage[1]);
 
-          if(tempPenType == 0){ // Pen
-              let initX = parseFloat(splittedMessage[2]);
-              let initY = parseFloat(splittedMessage[3]);
-              let control1x = parseFloat(splittedMessage[4]);
-              let control1y = parseFloat(splittedMessage[5]);
-              let control2x = parseFloat(splittedMessage[6]);
-              let control2y = parseFloat(splittedMessage[7]);
-              let finalX = parseFloat(splittedMessage[8]);
-              let finalY = parseFloat(splittedMessage[9]);
-              let tempPenSize = parseInt(splittedMessage[10]);
-              let tempPenColor = parseInt(splittedMessage[11]);
+          if (tempPenType == 0) {
+            // Pen
+            let initX = parseFloat(splittedMessage[2]);
+            let initY = parseFloat(splittedMessage[3]);
+            let control1x = parseFloat(splittedMessage[4]);
+            let control1y = parseFloat(splittedMessage[5]);
+            let control2x = parseFloat(splittedMessage[6]);
+            let control2y = parseFloat(splittedMessage[7]);
+            let finalX = parseFloat(splittedMessage[8]);
+            let finalY = parseFloat(splittedMessage[9]);
+            let tempPenSize = parseInt(splittedMessage[10]);
+            let tempPenColor = parseInt(splittedMessage[11]);
 
-              let tempSprite = new PIXI.Graphics();
+            let tempSprite = new PIXI.Graphics();
 
-              tempSprite.lineStyle(tempPenSize, tempPenColor, 1);
+            tempSprite.lineStyle(tempPenSize, tempPenColor, 1);
 
-              tempSprite.zIndex = currentZIndex;
-              tempSprite.moveTo(initX, initY);
-              tempSprite.bezierCurveTo(control1x, control1y, control2x, control2y, finalX, finalY);
+            tempSprite.zIndex = currentZIndex;
+            tempSprite.moveTo(initX, initY);
+            tempSprite.bezierCurveTo(
+              control1x,
+              control1y,
+              control2x,
+              control2y,
+              finalX,
+              finalY
+            );
 
-              sprite_array.push(tempSprite);
-              tempSprite.alpha = 0;
+            sprite_array.push(tempSprite);
+            tempSprite.alpha = 0;
 
-              stage.addChild(tempSprite);
-          }else if(tempPenType == 1){ // Eraser
-              let initX = parseFloat(splittedMessage[2]);
-              let initY = parseFloat(splittedMessage[3]);
-              let control1x = parseFloat(splittedMessage[4]);
-              let control1y = parseFloat(splittedMessage[5]);
-              let control2x = parseFloat(splittedMessage[6]);
-              let control2y = parseFloat(splittedMessage[7]);
-              let finalX = parseFloat(splittedMessage[8]);
-              let finalY = parseFloat(splittedMessage[9]);
-              let tempEraserSize = parseInt(splittedMessage[10]);
+            stage.addChild(tempSprite);
+          } else if (tempPenType == 1) {
+            // Eraser
+            let initX = parseFloat(splittedMessage[2]);
+            let initY = parseFloat(splittedMessage[3]);
+            let control1x = parseFloat(splittedMessage[4]);
+            let control1y = parseFloat(splittedMessage[5]);
+            let control2x = parseFloat(splittedMessage[6]);
+            let control2y = parseFloat(splittedMessage[7]);
+            let finalX = parseFloat(splittedMessage[8]);
+            let finalY = parseFloat(splittedMessage[9]);
+            let tempEraserSize = parseInt(splittedMessage[10]);
 
-              let tempSprite = new PIXI.Graphics();
+            let tempSprite = new PIXI.Graphics();
 
-              tempSprite.lineStyle(tempEraserSize, 0xffffff, 1);
+            tempSprite.lineStyle(tempEraserSize, 0xffffff, 1);
 
-              tempSprite.zIndex = currentZIndex;
-              tempSprite.moveTo(initX, initY);
-              tempSprite.bezierCurveTo(control1x, control1y, control2x, control2y, finalX, finalY);
+            tempSprite.zIndex = currentZIndex;
+            tempSprite.moveTo(initX, initY);
+            tempSprite.bezierCurveTo(
+              control1x,
+              control1y,
+              control2x,
+              control2y,
+              finalX,
+              finalY
+            );
 
-              sprite_array.push(tempSprite);
-              tempSprite.alpha = 0;
+            sprite_array.push(tempSprite);
+            tempSprite.alpha = 0;
 
-              stage.addChild(tempSprite);
-          }else if(tempPenType == 2){ // Typing
-              let tempTextSize = parseInt(splittedMessage[2]);
-              let tempTextColor = parseInt(splittedMessage[3]);
-              let tempText = splittedMessage[4];
-              let tempX = parseFloat(splittedMessage[5]);
-              let tempY = parseFloat(splittedMessage[6]);
-              
-              let tempStyle = new PIXI.TextStyle({
-                  fontFamily: "Arial",
-                  fontSize: tempTextSize,
-                  fill: tempTextColor,
-              });
+            stage.addChild(tempSprite);
+          } else if (tempPenType == 2) {
+            // Typing
+            let tempTextSize = parseInt(splittedMessage[2]);
+            let tempTextColor = parseInt(splittedMessage[3]);
+            let tempText = splittedMessage[4];
+            let tempX = parseFloat(splittedMessage[5]);
+            let tempY = parseFloat(splittedMessage[6]);
 
-              let tempPText = new PIXI.Text(tempText, tempStyle);
-              tempPText.zIndex = currentZIndex;
-              tempPText.x = tempX;
-              tempPText.y = tempY;
+            let tempStyle = new PIXI.TextStyle({
+              fontFamily: "Arial",
+              fontSize: tempTextSize,
+              fill: tempTextColor,
+            });
 
-              sprite_array.push(tempPText);
-              interactibleObjects.push(tempPText);
-              tempPText.alpha = 0;
+            let tempPText = new PIXI.Text(tempText, tempStyle);
+            tempPText.zIndex = currentZIndex;
+            tempPText.x = tempX;
+            tempPText.y = tempY;
 
-              stage.addChild(tempPText);
-          }else if(tempPenType == 3){
-              let temp_image = splittedMessage[2];
-              let tempX = parseFloat(splittedMessage[3]);
-              let tempY = parseFloat(splittedMessage[4]);
+            sprite_array.push(tempPText);
+            interactibleObjects.push(tempPText);
+            tempPText.alpha = 0;
 
-              const image_texture = PIXI.Texture.from(temp_image);
-              const sprite = new PIXI.Sprite(image_texture);
+            stage.addChild(tempPText);
+          } else if (tempPenType == 3) {
+            let temp_image = splittedMessage[2];
+            let tempX = parseFloat(splittedMessage[3]);
+            let tempY = parseFloat(splittedMessage[4]);
 
-              sprite.x = tempX;
-              sprite.y = tempY;
+            const image_texture = PIXI.Texture.from(temp_image);
+            const sprite = new PIXI.Sprite(image_texture);
 
-              sprite_array.push(sprite);
-              interactibleObjects.push(sprite);
-              sprite.alpha = 0;
+            sprite.x = tempX;
+            sprite.y = tempY;
 
-              stage.addChild(sprite);
-          }else{
+            sprite_array.push(sprite);
+            interactibleObjects.push(sprite);
+            sprite.alpha = 0;
+
+            stage.addChild(sprite);
+          } else {
             sprite_array.push(history[i]);
           }
         }
-
       }
     };
 
@@ -147,8 +325,7 @@ export function Canvas() {
 
   const handleCanvasContainerRef = (element) => {
     if (element && !app && !canvasCreated) {
-
-      canvasCreated =true;
+      canvasCreated = true;
 
       container = element;
       // Create a PixiJS application
@@ -163,10 +340,11 @@ export function Canvas() {
       const canvas = app.view;
 
       // Add a 'wheel' event listener to the canvas
-      canvas.addEventListener('wheel', onCanvasScroll);
+      canvas.addEventListener("wheel", onCanvasScroll);
 
       // Append the PixiJS canvas to the container element
       element.appendChild(app.view);
+      canvas.style.borderRadius = "20px";
 
       container.addEventListener("mousemove", onMouseMove, 0);
 
@@ -178,19 +356,17 @@ export function Canvas() {
 
   const SCALE_CONST = 0.1;
   var canvas_scale = 1.0;
-  var canvas_translation = {x: 0.0, y: 0.0};
+  var canvas_translation = { x: 0.0, y: 0.0 };
 
-  function transformPoint(x,y){
-
+  function transformPoint(x, y) {
     var newX = (x + canvas_translation.x) / canvas_scale;
     var newY = (y + canvas_translation.y) / canvas_scale;
 
-
-    return {x: newX, y: newY};
+    return { x: newX, y: newY };
   }
 
   function onCanvasScroll(event) {
-
+    event.preventDefault();
     const stage = app.stage;
     // Get the scroll direction
     const delta = Math.sign(event.deltaY) * SCALE_CONST;
@@ -204,11 +380,16 @@ export function Canvas() {
     stage.scale.set(stage.scale.x * (1 - delta));
     canvas_scale = stage.scale.x;
 
-    const translation = {x: middlePoint.x * (canvas_scale - prev_scale), y: middlePoint.y * (canvas_scale - prev_scale)}
+    const translation = {
+      x: middlePoint.x * (canvas_scale - prev_scale),
+      y: middlePoint.y * (canvas_scale - prev_scale),
+    };
 
-    canvas_translation = {x: canvas_translation.x + translation.x, y: canvas_translation.y + translation.y};
+    canvas_translation = {
+      x: canvas_translation.x + translation.x,
+      y: canvas_translation.y + translation.y,
+    };
     stage.position.set(-canvas_translation.x, -canvas_translation.y);
-
 
     /*var newMiddlePoint = transformPoint(0,0);
 
@@ -217,16 +398,15 @@ export function Canvas() {
     stage.position.set(stage.position.x + (temp_dist.x / canvas_scale), stage.position.y + (temp_dist.y / canvas_scale));
 
     canvas_translation = {x: canvas_translation.x + (temp_dist.x / canvas_scale), y: canvas_translation.y + (temp_dist.y / canvas_scale)};*/
-
   }
 
   const getMousePos = (event) => {
     const pos = { x: 0, y: 0 };
     if (container) {
-        // Get the position and size of the component on the page.
-        const holderOffset = app.view.getBoundingClientRect();
-        pos.x = event.pageX - holderOffset.x;
-        pos.y = event.pageY - holderOffset.y;
+      // Get the position and size of the component on the page.
+      const holderOffset = app.view.getBoundingClientRect();
+      pos.x = event.pageX - holderOffset.x;
+      pos.y = event.pageY - holderOffset.y;
     }
     return pos;
   };
@@ -238,30 +418,31 @@ export function Canvas() {
 
   const onMouseMove = (e) => {
     if (!isMouseButtonDown) {
-        return;
+      return;
     }
 
     const curMousePosRef = getMousePos(e);
 
-        const stage = app.stage;
+    const stage = app.stage;
 
-        let translationOffset = { x: 0, y: 0 };
-        translationOffset.x += curMousePosRef.x - initPointer.x;
-        translationOffset.y += curMousePosRef.y - initPointer.y;
+    let translationOffset = { x: 0, y: 0 };
+    translationOffset.x += curMousePosRef.x - initPointer.x;
+    translationOffset.y += curMousePosRef.y - initPointer.y;
 
-        
+    stage.position.set(
+      stage.position.x + translationOffset.x,
+      stage.position.y + translationOffset.y
+    );
 
-        stage.position.set(stage.position.x + translationOffset.x, stage.position.y + translationOffset.y);
+    canvas_translation.x = -stage.position.x;
+    canvas_translation.y = -stage.position.y;
 
-        canvas_translation.x = -stage.position.x;
-        canvas_translation.y = -stage.position.y;
+    initPointer = curMousePosRef;
 
-        initPointer = curMousePosRef;
+    return;
+  };
 
-        return;
-};
-
-const onMouseDown = (e) => {
+  const onMouseDown = (e) => {
     mousePosRef = getMousePos(e);
     initPointer = mousePosRef;
     isMouseButtonDown = true;
@@ -270,110 +451,132 @@ const onMouseDown = (e) => {
 
     //stage.addChild(sprite);
 
-    
-
     //console.log(mousePosRef);
-};
+  };
 
-
-const onMouseUp = (e) => {
+  const onMouseUp = (e) => {
     isMouseButtonDown = false;
-};
+  };
 
-let prev_value = 0;
+  let prev_value = 0;
 
-const handleChangeRange = (event) => {
+  const navigate_history = (cur_value) => {
+    if (prev_value < cur_value) {
+      for (let i = prev_value; i < cur_value; i++) {
+        if (typeof sprite_array[i] == "string") {
+          let splittedMessage = sprite_array[i].split("|");
+          if (parseInt(splittedMessage[0]) == 4) {
+            let temp_obj_index = parseInt(splittedMessage[1]);
+            let obj = interactibleObjects[temp_obj_index];
+            let tempX = parseFloat(splittedMessage[2]);
+            let tempY = parseFloat(splittedMessage[3]);
+            let tempWidth = parseFloat(splittedMessage[4]);
+            let tempHeight = parseFloat(splittedMessage[5]);
+            prev_transformations.push([
+              obj.position.x,
+              obj.position.y,
+              obj.width,
+              obj.height,
+            ]);
 
-  let cur_value = parseInt(event.target.value);
-
-  if(prev_value < cur_value){
-    for(let i = prev_value; i < cur_value; i++){
-      if(typeof sprite_array[i] == "string"){
-        let splittedMessage = sprite_array[i].split("|");
-        if(parseInt(splittedMessage[0]) == 4){
-          let temp_obj_index = parseInt(splittedMessage[1]);
-          let obj = interactibleObjects[temp_obj_index];
-          let tempX = parseFloat(splittedMessage[2]);
-          let tempY = parseFloat(splittedMessage[3]);
-          let tempWidth = parseFloat(splittedMessage[4]);
-          let tempHeight = parseFloat(splittedMessage[5]);
-          prev_transformations.push([obj.position.x,obj.position.y, obj.width, obj.height]);
-
-          obj.position.x = tempX;
-          obj.position.y = tempY;
-          obj.width = tempWidth;
-          obj.height = tempHeight;
-        }else if(parseInt(splittedMessage[0]) == -3){
-          for(let j = 0; j < i; j++){
-            if(typeof sprite_array[j] != "string"){
-              sprite_array[j].alpha = 0;
-            }
-          }
-        }
-      }else{
-        sprite_array[i].alpha = 1;
-      }
-    }
-    prev_value = cur_value;
-  }else{
-    
-    for(let i = prev_value - 1; i >= cur_value; i--){
-      if(typeof sprite_array[i] == "string"){
-        let splittedMessage = sprite_array[i].split("|");
-        if(parseInt(splittedMessage[0]) == 4){
-          let transformation_last = prev_transformations.pop();
-          let temp_obj_index = parseInt(splittedMessage[1]);
-          let obj = interactibleObjects[temp_obj_index];
-          let tempX = transformation_last[0];
-          let tempY = transformation_last[1];
-          let tempWidth = transformation_last[2];
-          let tempHeight = transformation_last[3];
-          //prev_transformations.push([obj.position.x,obj.position.y, obj.width, obj.height]);
-
-          obj.position.x = tempX;
-          obj.position.y = tempY;
-          obj.width = tempWidth;
-          obj.height = tempHeight;
-        }else if(parseInt(splittedMessage[0]) == -3){
-          for(let j = i - 1; j >= 0; j--){
-            if(typeof sprite_array[j] != "string"){
-              sprite_array[j].alpha = 1;
-            }else{
-              let message = sprite_array[j].split('|');
-              if(parseInt(message[0]) == -3){
-                j = -1;
+            obj.position.x = tempX;
+            obj.position.y = tempY;
+            obj.width = tempWidth;
+            obj.height = tempHeight;
+          } else if (parseInt(splittedMessage[0]) == -3) {
+            for (let j = 0; j < i; j++) {
+              if (typeof sprite_array[j] != "string") {
+                sprite_array[j].alpha = 0;
               }
             }
           }
+        } else {
+          sprite_array[i].alpha = 1;
         }
-      }else{
-        sprite_array[i].alpha = 0;
       }
+      prev_value = cur_value;
+    } else {
+      for (let i = prev_value - 1; i >= cur_value; i--) {
+        if (typeof sprite_array[i] == "string") {
+          let splittedMessage = sprite_array[i].split("|");
+          if (parseInt(splittedMessage[0]) == 4) {
+            let transformation_last = prev_transformations.pop();
+            let temp_obj_index = parseInt(splittedMessage[1]);
+            let obj = interactibleObjects[temp_obj_index];
+            let tempX = transformation_last[0];
+            let tempY = transformation_last[1];
+            let tempWidth = transformation_last[2];
+            let tempHeight = transformation_last[3];
+            //prev_transformations.push([obj.position.x,obj.position.y, obj.width, obj.height]);
+
+            obj.position.x = tempX;
+            obj.position.y = tempY;
+            obj.width = tempWidth;
+            obj.height = tempHeight;
+          } else if (parseInt(splittedMessage[0]) == -3) {
+            for (let j = i - 1; j >= 0; j--) {
+              if (typeof sprite_array[j] != "string") {
+                sprite_array[j].alpha = 1;
+              } else {
+                let message = sprite_array[j].split("|");
+                if (parseInt(message[0]) == -3) {
+                  j = -1;
+                }
+              }
+            }
+          }
+        } else {
+          sprite_array[i].alpha = 0;
+        }
+      }
+      prev_value = cur_value;
     }
-    prev_value = cur_value;
-  }
-  historyRef.current.value = prev_value;
+    historyRef.current.value = prev_value;
+  };
 
-};
+  const handleChangeRange = (event) => {
+    let cur_value = parseInt(event.target.value);
 
-
- 
+    navigate_history(cur_value);
+    historyRef.current.value = prev_value;
+  };
 
   return (
-    <div
-      className="flex flex-col justify-center w-full h-full md:px-5 py-5 bg-yellow-200"
-    >
+    <div className="flex flex-col justify-center w-full h-full md:px-5 py-5 space-y-2">
       <input
         ref={fileInputRef}
         type="file"
         accept=".wb"
-        style={{ display: 'none' }}
+        style={{ display: "none" }}
         onChange={handleFileInputChange}
       />
-      <button onClick={handleLoadButtonClick}>Load Whiteboard</button>
-      <div className="flex flex-col justify-center" id="canvas-container-1" ref={handleCanvasContainerRef}></div>
-      <input type="range" ref={historyRef} onChange={handleChangeRange}/>
 
+      <div
+        className="flex flex-col justify-center rounded-md"
+        id="canvas-container-1"
+        ref={handleCanvasContainerRef}
+      ></div>
+      <p className="text-center text-primary keko">
+        Please wait for history to reload
+      </p>
+
+      <input
+        type="range"
+        ref={historyRef}
+        onChange={handleChangeRange}
+        className="w-full hidden ozgur cursor-pointer bg-gray-700 rounded-lg h-2 appearance-none outline-none slider-thumb"
+        style={{
+          backgroundImage: "linear-gradient(to right, #059669, #10B981)",
+        }}
+      />
+
+      <Button
+        variant={"outline"}
+        className={"mx-auto"}
+        onClick={handleLoadButtonClick}
+      >
+        Load Another Whiteboard
+      </Button>
     </div>
   );
 }

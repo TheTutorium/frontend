@@ -16,7 +16,7 @@ import { dark, light } from "@clerk/themes";
 import { useTheme } from "./utils/ThemeContext";
 import { Team } from "./pages/Team";
 import { Contact } from "./pages/Contact";
-import { Stack } from "./pages/Stack";
+import { Manual } from "./pages/Manual";
 import { Meetings } from "./pages/Meetings";
 import Tutor from "./pages/Tutor";
 import { UserTypeProvider } from "./utils/UserTypeContext";
@@ -56,7 +56,7 @@ function ClerkProviderWithRoutes() {
             />
             <Route path="/team" element={<Team />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/stack" element={<Stack />} />
+            <Route path="/manual" element={<Manual />} />
             <Route
               path="/dashboard/*"
               element={
@@ -124,15 +124,15 @@ function ClerkProviderWithRoutes() {
             />
 
             <Route
-              path="/canvas"
+              path="/canvas/:id"
               element={
                 <>
-                  {/* <SignedIn> */}
-                  <Canvas />
-                  {/* </SignedIn>
+                  <SignedIn>
+                    <Canvas />
+                  </SignedIn>
                   <SignedOut>
                     <RedirectToSignIn />
-                  </SignedOut> */}
+                  </SignedOut>
                 </>
               }
             />

@@ -41,6 +41,7 @@ function Tutor() {
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const { getToken } = useAuth();
   const [canEdit, setCanEdit] = useState(false);
+  const [description, setDescription] = useState("");
   const { user } = useUser();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -69,6 +70,30 @@ function Tutor() {
     }
   };
 
+  const handleTutorUpdate = async (event) => {
+    event.preventDefault();
+    const token = await getToken();
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/users/`, {
+      method: "PUT",
+
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        description: description,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log(data);
+    setIsDialogOpen(false);
+  };
+
   useEffect(() => {
     const fetchCourses = async () => {
       setCoursesLoading(true);
@@ -86,7 +111,6 @@ function Tutor() {
         const data = await response.json();
         if (response.ok) {
           setCourses(data);
-          // console.log(data);
         } else {
           throw new Error(data.message);
         }
@@ -112,7 +136,7 @@ function Tutor() {
         const data = await response.json();
         if (response.ok) {
           setTutor(data);
-          // console.log(data);
+          setDescription(data.description);
           if (user.id === data.id) {
             setCanEdit(true);
           }
@@ -212,7 +236,7 @@ function Tutor() {
                     {/* description */}
                     <div className="mt-2">
                       <p className="text-sm text-muted-foreground italic">
-                        {tutor.description}
+                        {description}
                       </p>
                     </div>
                   </div>
@@ -234,15 +258,29 @@ function Tutor() {
                             you're done.
                           </DialogDescription>
                         </DialogHeader>
+                        <div className="flex flex-col space-y-2">
+                          <div className="flex flex-col space-y-1">
+                            <label
+                              htmlFor="description"
+                              className="text-sm font-medium text-muted-foreground"
+                            >
+                              Description
+                            </label>
+                            <textarea
+                              id="description"
+                              name="description"
+                              value={description}
+                              onChange={(e) => setDescription(e.target.value)}
+                              rows={3}
+                              className="text-primary-foreground shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md"
+                              placeholder="Enter a description"
+                            />
+                          </div>
+                          <div className="flex flex-col space-y-1"></div>
+                        </div>
                         <DialogFooter>
                           <div className={"w-full flex justify-between"}>
-                            <Button
-                              type="submit"
-                              onClick={() => {
-                                console.log("submit");
-                                setIsDialogOpen(false);
-                              }}
-                            >
+                            <Button type="submit" onClick={handleTutorUpdate}>
                               Save changes
                             </Button>
                           </div>
@@ -255,19 +293,13 @@ function Tutor() {
                   <div className="flex items-center space-x-2">
                     <CalendarDays className="h-4 w-4 text-muted-foreground" />
                     <p className="text-sm text-muted-foreground">
-                      {tutor.hours} hours
-                    </p>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Medal className="h-4 w-4 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">
-                      {tutor.badges} badges
+                      {tutor.hours_given} hours
                     </p>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Star className="h-4 w-4 text-muted-foreground" />
                     <p className="text-sm text-muted-foreground">
-                      {tutor.rating} rating
+                      {tutor.rating === -1 ? "N/A" : tutor.rating} rating
                     </p>
                   </div>
                 </div>
@@ -344,6 +376,7 @@ function Tutor() {
                                   {courseReviews.map((review) => (
                                     <Review
                                       key={review.id}
+                                      id={review.id}
                                       comment={review.comment}
                                       rating={review.rating}
                                       updatedAt={review.updated_at}

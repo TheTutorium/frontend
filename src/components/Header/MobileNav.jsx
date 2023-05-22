@@ -27,7 +27,7 @@ export function MobileNav({ children, showMobileMenu, setShowMobileMenu }) {
               "flex w-full items-center rounded-md p-2 text-sm font-medium hover:underline"
             )}
           >
-            Dashboard
+            Courses
           </Link>
           {user && (
             <Link
@@ -40,42 +40,6 @@ export function MobileNav({ children, showMobileMenu, setShowMobileMenu }) {
               Meetings
             </Link>
           )}
-          <Link
-            to={"/#about"}
-            onClick={() => setShowMobileMenu(false)}
-            className={cn(
-              "flex w-full items-center rounded-md p-2 text-sm font-medium hover:underline"
-            )}
-          >
-            About
-          </Link>
-          <Link
-            to={"/team"}
-            onClick={() => setShowMobileMenu(false)}
-            className={cn(
-              "flex w-full items-center rounded-md p-2 text-sm font-medium hover:underline"
-            )}
-          >
-            Team
-          </Link>
-          <Link
-            to={"/contact"}
-            onClick={() => setShowMobileMenu(false)}
-            className={cn(
-              "flex w-full items-center rounded-md p-2 text-sm font-medium hover:underline"
-            )}
-          >
-            Contact
-          </Link>
-          <Link
-            to={"/stack"}
-            onClick={() => setShowMobileMenu(false)}
-            className={cn(
-              "flex w-full items-center rounded-md p-2 text-sm font-medium hover:underline"
-            )}
-          >
-            Stack
-          </Link>
         </nav>
         {children}
       </div>

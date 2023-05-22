@@ -90,22 +90,11 @@ export function CourseCard({
       </CardHeader>
       <CardContent className="space-y-2">
         <div className="flex">
-          <div className="hidden md:flex">
-            <Avatar
-              style={{
-                width: isMobile ? "120px" : "160px",
-                height: isMobile ? "120px" : "160px",
-                borderRadius: "9px",
-              }}
-            >
-              <AvatarImage src={coursePic} alt={course.name} />
-              <AvatarFallback
-                style={{ fontSize: "1.5rem", borderRadius: "9px" }}
-              >
-                {course.name[0].toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          </div>
+          <AvatarComponent
+            isMobile={isMobile}
+            coursePic={coursePic}
+            course={course}
+          />
           <div className="p-3 w-full flex flex-col justify-center">
             <div className="flex space-x-2 items-center">
               <p className=" text-muted-foreground">Tutor:</p>
@@ -181,3 +170,43 @@ export function CourseCard({
     </Card>
   );
 }
+const AvatarComponent = ({ isMobile, coursePic, course }) => {
+  const [imageError, setImageError] = useState(false);
+
+  useEffect(() => {
+    console.log("coursePic", coursePic);
+  }, [coursePic]);
+
+  return (
+    <div
+      style={{
+        width: isMobile ? "120px" : "200px",
+        height: isMobile ? "120px" : "160px",
+        borderRadius: "9px",
+        overflow: "hidden",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        fontSize: "1.5rem",
+        backgroundColor: "#ccc", // placeholder color
+        color: "#000", // text color
+      }}
+    >
+      {!imageError ? (
+        <img
+          src={coursePic}
+          alt={course.name}
+          onError={() => setImageError(true)}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "center center",
+          }}
+        />
+      ) : (
+        <span>{course.name[0].toUpperCase()}</span>
+      )}
+    </div>
+  );
+};

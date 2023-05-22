@@ -1,7 +1,5 @@
 import * as React from "react";
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
-
-/* eslint-disable react/prop-types */
 import { cn } from "../../utils/utils";
 
 const Avatar = React.forwardRef(({ className, ...props }, ref) => (
@@ -19,7 +17,7 @@ Avatar.displayName = AvatarPrimitive.Root.displayName;
 const AvatarImage = React.forwardRef(({ className, ...props }, ref) => (
   <AvatarPrimitive.Image
     ref={ref}
-    className={cn("aspect-square h-full w-full", className)}
+    className={cn("aspect-square center-square h-full w-full", className)} // Added 'center-square' class
     {...props}
   />
 ));

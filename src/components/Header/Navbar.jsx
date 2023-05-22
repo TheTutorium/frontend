@@ -50,7 +50,7 @@ export default function Navbar({ items, children }) {
                       >
                         <Icons.logo className="h-6 w-6" />
                         <div className="mb-2 mt-4 text-lg font-medium">
-                          Tutorium
+                          Tutoryum
                         </div>
                         <p className="text-sm leading-tight text-muted-foreground">
                           Reinventing the peer-to-peer learning experience one
@@ -65,8 +65,8 @@ export default function Navbar({ items, children }) {
                   <ListItem to="/team" title="Team">
                     Meet the team behind Tutoryum
                   </ListItem>
-                  <ListItem to="/stack" title="Tech Stack">
-                    Get a sense of the tech stack we use
+                  <ListItem to="/manual" title="User Manual">
+                    User Manual for Tutoryum
                   </ListItem>
                   <ListItem to="/contact" title="Contact">
                     Reach us if you have any questions, feedback or just want to
@@ -110,12 +110,6 @@ export default function Navbar({ items, children }) {
                 </NavigationMenuItem>
               </>
             )}
-
-            <NavigationMenuItem>
-              <Link to={"/canvas"}>
-                <Button variant={"ghost"}>Canvas</Button>
-              </Link>
-            </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
       </div>

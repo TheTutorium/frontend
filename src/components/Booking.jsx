@@ -222,12 +222,19 @@ export default function Booking({ booking, isPassed, setData }) {
             <div className="w-full flex justify-between">
               {isPassed && isStudent && (
                 <Button
-                  className="mr-2"
+                  className="p-0"
                   variant="outline"
-                  onClick={() => setIsReviewOpen(true)}
+                  onClick={() => {
+                    console.log("clicked");
+                  }}
                 >
-                  <Image className="w-4 h-4 mr-2 inline-block" />
-                  Meeting White Board
+                  <a
+                    href={`/canvas/${booking.id}`}
+                    className="flex items-center p-2"
+                  >
+                    <Edit className="w-4 h-4 mr-2 inline-block" />
+                    Meeting White Board
+                  </a>
                 </Button>
               )}
 

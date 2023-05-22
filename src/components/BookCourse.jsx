@@ -94,7 +94,7 @@ export default function BookCourse({ courseId, duration }) {
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        <Button className="mr-2">
+        <Button className="mr-2" variant={"outline"}>
           <Edit className="w-4 h-4 mr-2 inline-block" />
           Book Meeting
         </Button>
