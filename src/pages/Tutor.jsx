@@ -19,6 +19,7 @@ import BookCourse from "../components/BookCourse";
 import { CourseCard } from "../components/CourseCard";
 import CourseMutate from "../components/CourseMutate";
 import Review from "../components/Review";
+import { useUserType } from "../utils/UserTypeContext";
 import { Button } from "../components/ui/button";
 import {
   Dialog,
@@ -32,6 +33,7 @@ import {
 
 function Tutor() {
   const { id } = useParams();
+  const { isTutor } = useUserType();
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [courses, setCourses] = useState([]);
   const [coursesLoading, setCoursesLoading] = useState(false);
@@ -323,6 +325,7 @@ function Tutor() {
                           .filter((course) => !course.deactivated)
                           .map((course) => (
                             <CourseCard
+                              isTutor={isTutor}
                               key={course.id}
                               course={course}
                               canEdit={canEdit}

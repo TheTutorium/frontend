@@ -84,6 +84,7 @@ export function Dashboard() {
                 courses.map((course) => (
                   <CourseCard
                     key={course.id}
+                    isTutor={isTutor}
                     canEdit={user.id === course.tutor_id}
                     course={course}
                     setCourses={setCourses}

@@ -41,6 +41,7 @@ export function CourseCard({
   canEdit,
   handleDeleteCourse,
   setCourses,
+  isTutor,
 }) {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -123,7 +124,7 @@ export function CourseCard({
               <p className="text-muted-foreground">Duration:</p>
               <p className="text-primary ">{course.duration} minutes</p>
             </div>
-            {!canEdit && (
+            {!canEdit && !isTutor && (
               <div className="mt-2">
                 <BookCourse courseId={course.id} duration={course.duration} />
               </div>
