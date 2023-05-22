@@ -19,9 +19,9 @@ export function Footer({ className }) {
             >
               Bilkent Students
             </Link>{" "}
-            with ❤️. The source code is available on{" "}
+            with 🫶. The source code is available on{" "}
             <Link
-              //   href={siteConfig.links.github}
+              href={"https://github.com/thetutorium"}
               target="_blank"
               rel="noreferrer"
               className="font-medium underline underline-offset-4"

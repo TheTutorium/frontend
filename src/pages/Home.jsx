@@ -1,26 +1,63 @@
+import { Link } from "react-router-dom";
+import { cn } from "../utils/utils";
+import { buttonVariants } from "../components/ui/button";
+import {
+  Globe,
+  History,
+  Image,
+  ShieldCheck,
+  Star,
+  User2,
+  Users2,
+} from "lucide-react";
+import { Video } from "lucide-react";
+
 export function Home() {
   return (
     <>
-      <div
-        className="
-        max-w-[1400px]
-        mx-auto
-        self-stretch
-        w-full  
-    "
-      >
-        <div className="flex flex-col items-center">
-          <div className="flex flex-col md:flex-row mt-5 md:mt-20">
-            <div className=" flex flex-col justify-center">
-              {" "}
-              <h1 className="text-5xl font-bold text-center text-primary p-3">
-                Every Master, Was Once A Cekirge
+      <section className="space-y-6 pb-8 pt-6 md:pb-12 md:pt-10 lg:py-16">
+        <div className="container flex max-w-[64rem] flex-col items-center gap-4 text-center">
+          <a
+            href={
+              "https://www.cs.bilkent.edu.tr/~cs4912/current/2022_ProjectTeamList.html"
+            }
+            className="rounded-2xl bg-muted px-4 py-1.5 text-sm font-medium"
+            target="_blank"
+          >
+            Support us on CS Fair 🥳
+          </a>
+          <div className="flex flex-col-reverse lg:flex-row items-center justify-around">
+            <div className="p-5 text-center lg:text-left">
+              <h1 className="font-heading text-3xl sm:text-5xl md:text-6xl lg:text-7xl mb-3">
+                Every Master <br />
+                Was Once a Cekirge
               </h1>
-              <p className="mt-4 text-center text-muted-foreground text-lg md:text-xl">
-                Reinventing the peer-to-peer learning experience, one hop at a
-                time.
+              <p className="max-w-[42rem] leading-normal text-muted-foreground sm:text-xl sm:leading-8">
+                Reinventing the peer-to-peer learning experience one hop at a
+                time. <br /> Find, Book, Meet and Learn.
               </p>
+
+              <div className="flex justify-center lg:justify-start space-x-4 mt-5">
+                <Link
+                  to={"/dashboard"}
+                  href="/dashboard"
+                  className={cn(buttonVariants({ size: "lg" }))}
+                >
+                  Find & Book
+                </Link>
+                <Link
+                  to={"/meetings"}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={cn(
+                    buttonVariants({ variant: "outline", size: "lg" })
+                  )}
+                >
+                  Meet
+                </Link>
+              </div>
             </div>
+
             <img
               className="rounded-full w-1/2 max-w-[400px] min-w-[200px] mx-auto m-5 md:m-2"
               src="/grasshopper.png"
@@ -28,29 +65,126 @@ export function Home() {
             />
           </div>
         </div>
-      </div>
-
-      <div className="mt-5 md:mt-20 w-full bg-secondary p-3" id="about">
-        <h1 className="text-3xl text-center font-bold text-primary p-3">
-          By Students For Students
-        </h1>
-        <p className=" text-center text-muted-foreground text-lg md:text-xl p-3 max-w-[700px] mx-auto">
-          Tutoryum is a peer-to-peer learning platform that aims to connect
-          students with each other to help them learn from each other. We
-          believe that students can learn better from each other than from their
-          professors. We also believe that students can teach better than their
-          professors. We are here to help students learn from each other and
-          teach each other.
-        </p>
-        <h1 className="text-3xl text-center font-bold text-primary p-3 mt-5 md:mt-20">
-          About Tutoryum
-        </h1>
-        <p className=" text-center text-muted-foreground text-lg md:text-xl p-3 max-w-[700px] mx-auto">
-          Landing page shit iste klasik doldurcaz burlari ilustrasyon vs koymayi
-          dusunebilriz benim aklimda sener senin cekirge sahnesi var ama
-          bilemedim
-        </p>
-      </div>
+      </section>
+      <section
+        id="features"
+        className="container space-y-6 bg-slate-50 py-8 dark:bg-transparent md:py-12 lg:py-24"
+      >
+        <div className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
+          <h2 className="font-heading text-3xl leading-[1.1] sm:text-3xl md:text-6xl">
+            Features
+          </h2>
+          <p className="max-w-[85%] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
+            Discover the powerful features of Tutoryum
+          </p>
+        </div>
+        <div className="mx-auto grid justify-center gap-4 sm:grid-cols-2 md:max-w-[64rem] md:grid-cols-3">
+          <div className="relative overflow-hidden rounded-lg border bg-background p-2">
+            <div className="flex h-[250px] flex-col justify-between rounded-md p-6">
+              <Users2 className="w-full h-[100px] inline-block " />
+              <div className="space-y-2">
+                <h3 className="font-bold text-center">Peer-to-Peer</h3>
+                <p className="text-sm text-muted-foreground">
+                  Experience clear, high-quality video calls with our optimized
+                  peer-to-peer communication feature.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="relative overflow-hidden rounded-lg border bg-background p-2">
+            <div className="flex h-[250px] flex-col justify-between rounded-md p-6">
+              <Image className="w-full h-[100px] inline-block " />
+              <div className="space-y-2">
+                <h3 className="font-bold text-center">
+                  Interactive Whiteboard
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Collaborate in real-time using our intuitive and
+                  fully-featured interactive whiteboard.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="relative overflow-hidden rounded-lg border bg-background p-2">
+            <div className="flex h-[250px] flex-col justify-between rounded-md p-6">
+              <History className="w-full h-[100px] inline-block " />
+              <div className="space-y-2">
+                <h3 className="font-bold text-center">Whiteboard History</h3>
+                <p className="text-sm text-muted-foreground">
+                  Relive past sessions effortlessly with our innovative
+                  whiteboard replay feature.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="relative overflow-hidden rounded-lg border bg-background p-2">
+            <div className="flex h-[250px] flex-col justify-between rounded-md p-6">
+              <Globe className="w-full h-[100px] inline-block " />
+              <div className="space-y-2">
+                <h3 className="font-bold text-center">Scalable Platform</h3>
+                <p className="text-sm text-muted-foreground">
+                  Tutoryum's scalability enables limitless growth and global
+                  educational connectivity
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="relative overflow-hidden rounded-lg border bg-background p-2">
+            <div className="flex h-[250px] flex-col justify-between rounded-md p-6">
+              <ShieldCheck className="w-full h-[100px] inline-block " />
+              <div className="space-y-2">
+                <h3 className="font-bold text-center">Secure & All-in-One</h3>
+                <p className="text-sm text-muted-foreground">
+                  Seamlessly secure and all-in-one. Find, book, meet and learn
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="open-source" className="container py-8 md:py-12 lg:py-24">
+        <div className="mx-auto flex max-w-[58rem] flex-col items-center justify-center gap-4 text-center">
+          <h2 className="font-heading text-3xl leading-[1.1] sm:text-3xl md:text-6xl">
+            By Students For Students
+          </h2>
+          <p className="max-w-[85%] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
+            Tutoryum is developed by students for the students. All the source
+            code and documents about development can be found in our{" "}
+            <a
+              href={"https://github.com/thetutorium"}
+              target="_blank"
+              rel="noreferrer"
+              className="underline underline-offset-4"
+            >
+              GitHub
+            </a>
+            .{" "}
+          </p>
+          <a
+            href={"https://github.com/thetutorium"}
+            target="_blank"
+            rel="noreferrer"
+            className="flex"
+          >
+            <div className="flex h-10 w-10 items-center justify-center space-x-2 rounded-md border border-muted bg-muted">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+                className="h-5 w-5 text-foreground"
+              >
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path>
+              </svg>
+            </div>
+            <div className="flex items-center">
+              <div className="h-4 w-4 border-y-8 border-l-0 border-r-8 border-solid border-muted border-y-transparent"></div>
+              <div className="flex h-10 items-center rounded-md border border-muted bg-muted px-4 font-medium">
+                <Star className={"w-5 h-5 mr-2"} /> Star
+              </div>
+            </div>
+          </a>
+        </div>
+      </section>
     </>
   );
 }

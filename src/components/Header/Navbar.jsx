@@ -59,7 +59,7 @@ export default function Navbar({ items, children }) {
                       </Link>
                     </NavigationMenuLink>
                   </li>
-                  <ListItem to="/#about" title="About">
+                  <ListItem to="/" title="About">
                     Learn about Tutoryum and its mission, vision and values
                   </ListItem>
                   <ListItem to="/team" title="Team">

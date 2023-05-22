@@ -202,7 +202,7 @@ export default function Booking({ booking, isPassed, setData }) {
                       isTutor
                         ? booking.tutor_meeting_code
                         : booking.student_meeting_code
-                    }`}
+                    }/${booking.id}`}
                   >
                     {`${import.meta.env.VITE_MEETING_URL}/${
                       isTutor
@@ -212,7 +212,7 @@ export default function Booking({ booking, isPassed, setData }) {
                       isTutor
                         ? booking.tutor_meeting_code
                         : booking.student_meeting_code
-                    }`}
+                    }/${booking.id}`}
                   </a>
                 </Button>
               </div>

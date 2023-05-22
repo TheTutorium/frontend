@@ -1,4 +1,4 @@
-import { Github, Linkedin, Mail } from "lucide-react";
+import { Github, Globe, Instagram, Linkedin, Mail } from "lucide-react";
 import React from "react";
 
 export function Team() {
@@ -45,6 +45,13 @@ export function Team() {
               >
                 <Mail name="mail" className="w-6 h-6 " />
               </a>
+              <a
+                href="https://instagram.com/hozgurde"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Instagram name="insta" className="w-6 h-6 " />
+              </a>
             </div>
           </div>
           <div className="card border p-5 rounded-lg text-center">
@@ -79,6 +86,14 @@ export function Team() {
                 rel="noreferrer"
               >
                 <Mail name="mail" className="w-6 h-6 " />
+              </a>
+
+              <a
+                href="https://mcagridurgut.com"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Globe name="globe" className="w-6 h-6 " />
               </a>
             </div>
           </div>
@@ -121,9 +136,7 @@ export function Team() {
               className="mx-auto w-48 h-48 rounded-full mb-5"
             />
             <h3 className="text-2xl mb-2">Baris Ogun Yoruk</h3>
-            <h4 className="text-xl text-muted-foreground mb-3">
-              Backend / Cagrinin yarragini yalamak
-            </h4>
+            <h4 className="text-xl text-muted-foreground mb-3">Backend</h4>
             <div className="flex justify-center space-x-5 mt-4 text-primary">
               <a
                 href="https://github.com/barisoyoruk"
@@ -145,6 +158,14 @@ export function Team() {
                 rel="noreferrer"
               >
                 <Mail name="mail" className="w-6 h-6 " />
+              </a>
+
+              <a
+                href="https://instagram.com/barisoguny"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Instagram name="insta" className="w-6 h-6 " />
               </a>
             </div>
           </div>
@@ -179,6 +200,14 @@ export function Team() {
                 rel="noreferrer"
               >
                 <Mail name="mail" className="w-6 h-6 " />
+              </a>
+
+              <a
+                href="https://instagram.com/ouzanozcelik"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Instagram name="insta" className="w-6 h-6 " />
               </a>
             </div>
           </div>
