@@ -3,7 +3,7 @@ import { useAuth } from "@clerk/clerk-react";
 const UserTypeContext = createContext();
 
 export function UserTypeProvider({ children }) {
-  const [isTutor, setIsTutor] = useState(null);
+  const [isTutor, setIsTutor] = useState(false);
   const [typeLoading, setTypeLoading] = useState(true);
   const { getToken } = useAuth();
   // get user

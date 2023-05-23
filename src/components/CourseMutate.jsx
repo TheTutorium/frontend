@@ -114,7 +114,7 @@ export default function CourseMutate({ setCourses, course, edit }) {
             {edit && (
               <>
                 <TabsTrigger value="picture">Picture</TabsTrigger>
-                <TabsTrigger value="materials">Materials</TabsTrigger>
+                {/* <TabsTrigger value="materials">Materials</TabsTrigger> */}
               </>
             )}
           </TabsList>
@@ -180,9 +180,9 @@ export default function CourseMutate({ setCourses, course, edit }) {
                   onChange={(e) => setFile(e.target.files[0])}
                 />
               </TabsContent>
-              <TabsContent value="materials">
+              {/* <TabsContent value="materials">
                 <h1>sa</h1>{" "}
-              </TabsContent>
+              </TabsContent> */}
             </>
           )}
         </Tabs>

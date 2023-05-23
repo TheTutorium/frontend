@@ -179,6 +179,13 @@ export function Canvas() {
   let sprite_array = [];
 
   const handleFileInputChange = (event) => {
+    interactibleObjects = [];
+    prev_transformations = [];
+
+    sprite_array = [];
+
+    container.removeChildren();
+
     const file = event.target.files[0];
     const reader = new FileReader();
     const stage = app.stage;

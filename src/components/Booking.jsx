@@ -188,35 +188,33 @@ export default function Booking({ booking, isPassed, setData }) {
                 {booking.course_duration} minutes
               </p>
             </div>
-            {!isPassed && (
-              <div className="flex space-x-2 items-center">
-                <p className="text-sm text-muted-foreground">Link:</p>
-                <Button className="p-0" variant="link">
-                  <a
-                    target="_blank"
-                    href={`${import.meta.env.VITE_MEETING_URL}/${
-                      isTutor
-                        ? booking.student_meeting_code
-                        : booking.tutor_meeting_code
-                    }/${
-                      isTutor
-                        ? booking.tutor_meeting_code
-                        : booking.student_meeting_code
-                    }/${booking.id}`}
-                  >
-                    {`${import.meta.env.VITE_MEETING_URL}/${
-                      isTutor
-                        ? booking.student_meeting_code
-                        : booking.tutor_meeting_code
-                    }/${
-                      isTutor
-                        ? booking.tutor_meeting_code
-                        : booking.student_meeting_code
-                    }/${booking.id}`}
-                  </a>
-                </Button>
-              </div>
-            )}
+            <div className="flex space-x-2 items-center">
+              <p className="text-sm text-muted-foreground">Link:</p>
+              <Button className="p-0" variant="link">
+                <a
+                  target="_blank"
+                  href={`${import.meta.env.VITE_MEETING_URL}/${
+                    isTutor
+                      ? booking.student_meeting_code
+                      : booking.tutor_meeting_code
+                  }/${
+                    isTutor
+                      ? booking.tutor_meeting_code
+                      : booking.student_meeting_code
+                  }/${booking.id}`}
+                >
+                  {`${import.meta.env.VITE_MEETING_URL}/${
+                    isTutor
+                      ? booking.student_meeting_code
+                      : booking.tutor_meeting_code
+                  }/${
+                    isTutor
+                      ? booking.tutor_meeting_code
+                      : booking.student_meeting_code
+                  }/${booking.id}`}
+                </a>
+              </Button>
+            </div>
           </CardContent>
           <CardFooter>
             <div className="w-full flex justify-between">
