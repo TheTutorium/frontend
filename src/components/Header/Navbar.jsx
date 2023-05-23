@@ -101,6 +101,12 @@ export default function Navbar({ items, children }) {
                 <Button variant={"ghost"}>Courses</Button>
               </Link>
             </NavigationMenuItem>
+
+            <NavigationMenuItem>
+              <Link to={"/canvas"}>
+                <Button variant={"ghost"}>Canvas</Button>
+              </Link>
+            </NavigationMenuItem>
             {user && (
               <>
                 <NavigationMenuItem>

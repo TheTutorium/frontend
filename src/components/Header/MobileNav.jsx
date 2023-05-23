@@ -29,6 +29,15 @@ export function MobileNav({ children, showMobileMenu, setShowMobileMenu }) {
           >
             Courses
           </Link>
+          <Link
+            to={"/canvas"}
+            onClick={() => setShowMobileMenu(false)}
+            className={cn(
+              "flex w-full items-center rounded-md p-2 text-sm font-medium hover:underline"
+            )}
+          >
+            Canvas
+          </Link>
           {user && (
             <Link
               to={"/meetings"}

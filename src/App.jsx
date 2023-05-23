@@ -22,6 +22,7 @@ import Tutor from "./pages/Tutor";
 import { UserTypeProvider } from "./utils/UserTypeContext";
 import { Canvas } from "./pages/Canvas";
 import { Courses } from "./pages/Courses";
+import FreeCanvas from "./pages/FreeCanvas";
 
 const clerk_pub_key = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -133,6 +134,14 @@ function ClerkProviderWithRoutes() {
                   <SignedOut>
                     <RedirectToSignIn />
                   </SignedOut>
+                </>
+              }
+            />
+            <Route
+              path="/canvas"
+              element={
+                <>
+                  <FreeCanvas />
                 </>
               }
             />

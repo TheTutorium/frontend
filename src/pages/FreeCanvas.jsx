@@ -1,172 +1,9 @@
 import * as PIXI from "pixi.js";
-import { useParams } from "react-router-dom";
-import React, { useEffect, useRef, useState } from "react";
-import { useAuth } from "@clerk/clerk-react";
+import React, { useRef } from "react";
 import { Button } from "../components/ui/button";
 
-export function Canvas() {
-  const { id } = useParams();
-  const { getToken } = useAuth();
-
-  useEffect(() => {
-    const fetchWhiteboard = async (id) => {
-      const token = await getToken();
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/whiteboards/by-booking/${id}/`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        const data = await response.json();
-        if (response.ok) {
-          console.log(data);
-          const stage = app.stage;
-          if (app) {
-            let history = data.content.split("\n");
-
-            console.log(typeof history[0]);
-
-            historyRef.current.min = 0;
-            historyRef.current.max = history.length - 1; // Update the maximum value
-            historyRef.current.value = 0;
-
-            for (let i = 0; i < history.length; i++) {
-              let splittedMessage = history[i].split("|");
-              //console.log(history[i]);
-
-              let tempPenType = parseInt(splittedMessage[0]);
-              let currentZIndex = parseInt(splittedMessage[1]);
-
-              if (tempPenType == 0) {
-                // Pen
-                let initX = parseFloat(splittedMessage[2]);
-                let initY = parseFloat(splittedMessage[3]);
-                let control1x = parseFloat(splittedMessage[4]);
-                let control1y = parseFloat(splittedMessage[5]);
-                let control2x = parseFloat(splittedMessage[6]);
-                let control2y = parseFloat(splittedMessage[7]);
-                let finalX = parseFloat(splittedMessage[8]);
-                let finalY = parseFloat(splittedMessage[9]);
-                let tempPenSize = parseInt(splittedMessage[10]);
-                let tempPenColor = parseInt(splittedMessage[11]);
-
-                let tempSprite = new PIXI.Graphics();
-
-                tempSprite.lineStyle(tempPenSize, tempPenColor, 1);
-
-                tempSprite.zIndex = currentZIndex;
-                tempSprite.moveTo(initX, initY);
-                tempSprite.bezierCurveTo(
-                  control1x,
-                  control1y,
-                  control2x,
-                  control2y,
-                  finalX,
-                  finalY
-                );
-
-                sprite_array.push(tempSprite);
-                tempSprite.alpha = 0;
-
-                stage.addChild(tempSprite);
-              } else if (tempPenType == 1) {
-                // Eraser
-                let initX = parseFloat(splittedMessage[2]);
-                let initY = parseFloat(splittedMessage[3]);
-                let control1x = parseFloat(splittedMessage[4]);
-                let control1y = parseFloat(splittedMessage[5]);
-                let control2x = parseFloat(splittedMessage[6]);
-                let control2y = parseFloat(splittedMessage[7]);
-                let finalX = parseFloat(splittedMessage[8]);
-                let finalY = parseFloat(splittedMessage[9]);
-                let tempEraserSize = parseInt(splittedMessage[10]);
-
-                let tempSprite = new PIXI.Graphics();
-
-                tempSprite.lineStyle(tempEraserSize, 0xffffff, 1);
-
-                tempSprite.zIndex = currentZIndex;
-                tempSprite.moveTo(initX, initY);
-                tempSprite.bezierCurveTo(
-                  control1x,
-                  control1y,
-                  control2x,
-                  control2y,
-                  finalX,
-                  finalY
-                );
-
-                sprite_array.push(tempSprite);
-                tempSprite.alpha = 0;
-
-                stage.addChild(tempSprite);
-              } else if (tempPenType == 2) {
-                // Typing
-                let tempTextSize = parseInt(splittedMessage[2]);
-                let tempTextColor = parseInt(splittedMessage[3]);
-                let tempText = splittedMessage[4];
-                let tempX = parseFloat(splittedMessage[5]);
-                let tempY = parseFloat(splittedMessage[6]);
-
-                let tempStyle = new PIXI.TextStyle({
-                  fontFamily: "Arial",
-                  fontSize: tempTextSize,
-                  fill: tempTextColor,
-                });
-
-                let tempPText = new PIXI.Text(tempText, tempStyle);
-                tempPText.zIndex = currentZIndex;
-                tempPText.x = tempX;
-                tempPText.y = tempY;
-
-                sprite_array.push(tempPText);
-                interactibleObjects.push(tempPText);
-                tempPText.alpha = 0;
-
-                stage.addChild(tempPText);
-              } else if (tempPenType == 3) {
-                let temp_image = splittedMessage[2];
-                let tempX = parseFloat(splittedMessage[3]);
-                let tempY = parseFloat(splittedMessage[4]);
-
-                const image_texture = PIXI.Texture.from(temp_image);
-                const sprite = new PIXI.Sprite(image_texture);
-
-                sprite.x = tempX;
-                sprite.y = tempY;
-
-                sprite_array.push(sprite);
-                interactibleObjects.push(sprite);
-                sprite.alpha = 0;
-
-                stage.addChild(sprite);
-              } else {
-                sprite_array.push(history[i]);
-              }
-            }
-            navigate_history(sprite_array.length - 1);
-            document
-              .getElementsByClassName("ozgur")[0]
-              .classList.toggle("hidden");
-            document
-              .getElementsByClassName("keko")[0]
-              .classList.toggle("hidden");
-          }
-        } else {
-          throw new Error(data.message);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    console.log(id);
-    fetchWhiteboard(id);
-  }, []);
+export default function FreeCanvas() {
+  //const [value, setValue] = useState(0);
 
   const historyRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -344,7 +181,6 @@ export function Canvas() {
 
       // Append the PixiJS canvas to the container element
       element.appendChild(app.view);
-      canvas.style.borderRadius = "20px";
 
       container.addEventListener("mousemove", onMouseMove, 0);
 
@@ -366,7 +202,6 @@ export function Canvas() {
   }
 
   function onCanvasScroll(event) {
-    event.preventDefault();
     const stage = app.stage;
     // Get the scroll direction
     const delta = Math.sign(event.deltaY) * SCALE_CONST;
@@ -460,7 +295,9 @@ export function Canvas() {
 
   let prev_value = 0;
 
-  const navigate_history = (cur_value) => {
+  const handleChangeRange = (event) => {
+    let cur_value = parseInt(event.target.value);
+
     if (prev_value < cur_value) {
       for (let i = prev_value; i < cur_value; i++) {
         if (typeof sprite_array[i] == "string") {
@@ -534,49 +371,41 @@ export function Canvas() {
     historyRef.current.value = prev_value;
   };
 
-  const handleChangeRange = (event) => {
-    let cur_value = parseInt(event.target.value);
-
-    navigate_history(cur_value);
-    historyRef.current.value = prev_value;
-  };
-
   return (
-    <div className="flex flex-col justify-center w-full h-full md:px-5 py-5 space-y-2">
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".wb"
-        style={{ display: "none" }}
-        onChange={handleFileInputChange}
-      />
+    <>
+      <div className="flex flex-col justify-center w-full h-full md:px-5 py-5 space-y-2">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".wb"
+          style={{ display: "none" }}
+          onChange={handleFileInputChange}
+        />
 
-      <div
-        className="flex flex-col justify-center rounded-md"
-        id="canvas-container-1"
-        ref={handleCanvasContainerRef}
-      ></div>
-      <p className="text-center text-primary keko">
-        Please wait for history to reload
-      </p>
+        <div
+          className="flex flex-col justify-center rounded-md"
+          id="canvas-container-1"
+          ref={handleCanvasContainerRef}
+        ></div>
 
-      <input
-        type="range"
-        ref={historyRef}
-        onChange={handleChangeRange}
-        className="w-full hidden ozgur cursor-pointer bg-gray-700 rounded-lg h-2 appearance-none outline-none slider-thumb"
-        style={{
-          backgroundImage: "linear-gradient(to right, #059669, #10B981)",
-        }}
-      />
+        <input
+          type="range"
+          ref={historyRef}
+          onChange={handleChangeRange}
+          className="w-full cursor-pointer bg-gray-700 rounded-lg h-2 appearance-none outline-none slider-thumb"
+          style={{
+            backgroundImage: "linear-gradient(to right, #059669, #10B981)",
+          }}
+        />
 
-      {/* <Button
-        variant={"outline"}
-        className={"mx-auto"}
-        onClick={handleLoadButtonClick}
-      >
-        Load Another Whiteboard
-      </Button> */}
-    </div>
+        <Button
+          variant={"outline"}
+          className={"mx-auto"}
+          onClick={handleLoadButtonClick}
+        >
+          Load Whiteboard
+        </Button>
+      </div>
+    </>
   );
 }
