@@ -202,6 +202,7 @@ export default function FreeCanvas() {
   }
 
   function onCanvasScroll(event) {
+    event.preventDefault();
     const stage = app.stage;
     // Get the scroll direction
     const delta = Math.sign(event.deltaY) * SCALE_CONST;

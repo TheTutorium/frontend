@@ -102,11 +102,6 @@ export default function Navbar({ items, children }) {
               </Link>
             </NavigationMenuItem>
 
-            <NavigationMenuItem>
-              <Link to={"/canvas"}>
-                <Button variant={"ghost"}>Canvas</Button>
-              </Link>
-            </NavigationMenuItem>
             {user && (
               <>
                 <NavigationMenuItem>
@@ -116,6 +111,12 @@ export default function Navbar({ items, children }) {
                 </NavigationMenuItem>
               </>
             )}
+
+            <NavigationMenuItem>
+              <Link to={"/canvas"}>
+                <Button variant={"ghost"}>Canvas</Button>
+              </Link>
+            </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
       </div>
