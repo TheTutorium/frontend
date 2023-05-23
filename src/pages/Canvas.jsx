@@ -184,11 +184,11 @@ export function Canvas() {
 
     sprite_array = [];
 
-    container.removeChildren();
-
     const file = event.target.files[0];
     const reader = new FileReader();
     const stage = app.stage;
+
+    stage.removeChildren();
 
     reader.onload = (e) => {
       const loadedText = e.target.result;
